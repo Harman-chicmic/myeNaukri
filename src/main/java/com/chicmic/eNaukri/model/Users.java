@@ -51,4 +51,8 @@ public class Users {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,fetch =FetchType.LAZY)
     private List<UserSkills> userSkillsList=new ArrayList<>();
 
+    @OneToMany(cascade = CascadeType.ALL,fetch=FetchType.EAGER,mappedBy = "userr")
+    @JsonIgnore
+    private Set<UserToken> userTokenSet=new HashSet<>();
+
 }
