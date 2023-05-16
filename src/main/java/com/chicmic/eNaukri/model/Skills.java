@@ -1,11 +1,11 @@
 package com.chicmic.eNaukri.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -16,5 +16,8 @@ public class Skills {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long skillId;
     private String skillName;
+
+    @OneToMany(mappedBy = "skills",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    private List<UserSkills> userSkillsList=new ArrayList<>();
 
 }

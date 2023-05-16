@@ -48,4 +48,7 @@ public class Users {
     @OneToMany(mappedBy = "applicantId", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     private List<Application> applicationList=new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,fetch =FetchType.LAZY)
+    private List<UserSkills> userSkillsList=new ArrayList<>();
+
 }
