@@ -4,7 +4,7 @@ import com.chicmic.eNaukri.model.UserToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserTokenRepo extends JpaRepository<UserToken,Long> {
-    UserToken findByUuid(String token);
+    UserToken findByToken(String token);
 
-    void deleteByUuid(String value);
+    void deleteByToken(String value);
 }
