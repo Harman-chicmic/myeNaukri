@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 public class UserToken {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userTokenId;
 
     private String token;

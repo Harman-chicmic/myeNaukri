@@ -16,7 +16,7 @@ import java.util.List;
 public class Job {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long jobId;
 
     private String jobTitle;

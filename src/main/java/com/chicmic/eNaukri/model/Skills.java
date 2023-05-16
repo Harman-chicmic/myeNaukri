@@ -13,7 +13,7 @@ import java.util.List;
 public class Skills {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long skillId;
     private String skillName;
 
