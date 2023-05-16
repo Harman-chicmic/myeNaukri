@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 
 @Entity
 @Data
-@Builder
 @RequiredArgsConstructor
 public class UserToken {
 
