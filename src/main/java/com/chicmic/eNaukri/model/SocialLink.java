@@ -1,9 +1,6 @@
 package com.chicmic.eNaukri.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
@@ -13,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 public class SocialLink {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long socialLinkId;
 
     private String linkedIn;

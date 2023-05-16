@@ -15,7 +15,7 @@ import java.time.LocalDate;
 public class UserCompany {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userCompanyId;
 
     private String employeeRole;
