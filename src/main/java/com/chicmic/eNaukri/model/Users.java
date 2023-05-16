@@ -2,6 +2,7 @@ package com.chicmic.eNaukri.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.annotations.UuidGenerator;
@@ -14,6 +15,7 @@ import java.util.Set;
 @Data
 @Entity
 @RequiredArgsConstructor
+@Builder
 public class Users {
 
     @Id
@@ -28,10 +30,12 @@ public class Users {
     private String cvPath;
     private String bio;
     private String ppPath;
-    private String otp;
+    private int otp;
     @UuidGenerator
     private String uuid;
     private String link;
+    private boolean otpVerified;
+
 //    private Set<Skills> skillsSet=new HashSet<>();
 
 //mappings
