@@ -24,13 +24,13 @@ public class Company {
     private String about;
     private String ppPath;
 
-    @OneToMany(mappedBy = "postFor", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "postFor", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
     private List<Job> jobList=new ArrayList<>();
 
     @OneToMany(mappedBy = "exCompany", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Experience> experienceList=new ArrayList<>();
 
-    @OneToOne(mappedBy = "companyLinks",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "companyLinks",cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     private SocialLink socialLink;
 }

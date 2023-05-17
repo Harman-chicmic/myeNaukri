@@ -17,7 +17,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -76,7 +78,7 @@ public class UserServiceImpl implements UserDetailsService {
 
     public String findCurrentCompany(Long id) {
         Users users=usersRepo.findById(id).get();
-        return experienceRepo.findByExpUserAndCurrentlyWorking(users,true).getExCompany().getCompanyName();
+       return experienceRepo.findByExpUserAndCurrentlyWorking(users,true).getExCompany().getCompanyName();
     }
 
     public void saveJob(Job job, String postedFor) {

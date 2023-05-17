@@ -3,12 +3,15 @@ package com.chicmic.eNaukri.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -22,11 +25,8 @@ public class Job {
 
     private String jobTitle;
     private String jobDesc;
-    @JsonFormat(pattern="yyyy/mm/dd")
     private LocalDate postedOn;
-    @JsonFormat(pattern="yyyy/mm/dd")
     private LocalDate updatedOn;
-    @JsonFormat(pattern="yyyy/mm/dd")
     private LocalDate expiresAt;
     private boolean active;
 
