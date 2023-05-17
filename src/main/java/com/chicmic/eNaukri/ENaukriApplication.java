@@ -4,6 +4,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.concurrent.Executor;
 
@@ -22,6 +24,11 @@ public class ENaukriApplication {
 		taskExecutor.setQueueCapacity(700);
 		taskExecutor.initialize();
 		return taskExecutor;
+	}
+
+	@Bean
+	public static PasswordEncoder passwordEncoder(){
+		return new BCryptPasswordEncoder();
 	}
 
 }
