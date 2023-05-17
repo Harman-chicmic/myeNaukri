@@ -2,7 +2,6 @@ package com.chicmic.eNaukri.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonSetter;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -12,26 +11,24 @@ import java.time.LocalDate;
 @Entity
 @Data
 @RequiredArgsConstructor
-public class UserCompany {
-
+public class Experience {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userCompanyId;
+    private Long expId;
 
-    private String employeeRole;
+    private String role;
     private String roleDesc;
     private boolean currentlyWorking;
     @JsonFormat(pattern="yyyy/mm/dd")
-    private LocalDate joinedAt;
+    private LocalDate joinedOn;
     @JsonFormat(pattern="yyyy/mm/dd")
-    private LocalDate leftAt;
-
-    //mappings
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JsonIgnore
-    private Company usersCompany;
+    private LocalDate endedOn;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JsonIgnore
-    private Users companyUsers;
+    private Users expUser;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JsonIgnore
+    private Company exCompany;
 }
