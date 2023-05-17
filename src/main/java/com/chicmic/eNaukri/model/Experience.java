@@ -11,21 +11,24 @@ import java.time.LocalDate;
 @Entity
 @Data
 @RequiredArgsConstructor
-public class Education {
-
+public class Experience {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long exId;
+    private Long expId;
 
-    private String universityName;
-    private String majors;
-    private LocalDate startFrom;
+    private String role;
+    private String roleDesc;
+    private boolean currentlyWorking;
     @JsonFormat(pattern="yyyy/mm/dd")
-    private LocalDate endOn;
+    private LocalDate joinedOn;
     @JsonFormat(pattern="yyyy/mm/dd")
-    private boolean student;
+    private LocalDate endedOn;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JsonIgnore
-    private Users edUser;
+    private Users expUser;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JsonIgnore
+    private Company exCompany;
 }
