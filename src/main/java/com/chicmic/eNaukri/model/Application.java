@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 public class Application {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long applicationId;
 
     private String cvPath;
