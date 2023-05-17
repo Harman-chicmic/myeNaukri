@@ -2,7 +2,9 @@ package com.chicmic.eNaukri.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.annotations.UuidGenerator;
 
@@ -13,7 +15,8 @@ import java.util.Set;
 
 @Data
 @Entity
-@RequiredArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
 public class Users {
 
     @Id
@@ -53,7 +56,7 @@ public class Users {
     @JsonIgnore
     private Set<UserToken> userTokenSet=new HashSet<>();
 
-    @OneToMany(mappedBy = "expUser", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "expUser",orphanRemoval = true, cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     private List<Experience> experienceList=new ArrayList<>();
 
 

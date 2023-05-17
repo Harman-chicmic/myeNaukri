@@ -1,6 +1,9 @@
 package com.chicmic.eNaukri.conrtoller;
 
 import com.chicmic.eNaukri.repo.UsersRepo;
+import com.chicmic.eNaukri.service.UserServiceImpl;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,7 +15,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class HomeController {
 
-    public final UsersRepo usersRepo;
+    private final UsersRepo usersRepo;
+    private final UserServiceImpl userService;
     @GetMapping
     public String homePage(){
         System.out.println("1");
@@ -32,10 +36,10 @@ public class HomeController {
     }
     @PostMapping("signup")
     public void userSignup(@RequestBody Map<Object,Object> map){
-
     }
-    @GetMapping("logout")
-    public String logout(){
+    @GetMapping("logout-user")
+    public String logout(HttpServletRequest request, HttpServletResponse response){
+        userService.logout(request,response);
         return "Logout Successful";
     }
     @GetMapping("forgot-password")

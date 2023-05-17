@@ -24,11 +24,11 @@ public class Experience {
     @JsonFormat(pattern="yyyy/mm/dd")
     private LocalDate endedOn;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JsonIgnore
     private Users expUser;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JsonIgnore
     private Company exCompany;
 }

@@ -1,5 +1,6 @@
 package com.chicmic.eNaukri.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import jakarta.persistence.*;
@@ -21,8 +22,11 @@ public class Job {
 
     private String jobTitle;
     private String jobDesc;
+    @JsonFormat(pattern="yyyy/mm/dd")
     private LocalDate postedOn;
+    @JsonFormat(pattern="yyyy/mm/dd")
     private LocalDate updatedOn;
+    @JsonFormat(pattern="yyyy/mm/dd")
     private LocalDate expiresAt;
     private boolean active;
 
