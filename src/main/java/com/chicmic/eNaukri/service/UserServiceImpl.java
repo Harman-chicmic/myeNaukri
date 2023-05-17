@@ -28,7 +28,6 @@ public class UserServiceImpl implements UserDetailsService {
     private final ApplicationRepo applicationRepo;
     private final JobRepo jobRepo;
     private final SkillsRepo skillsRepo;
-    private final UserCompanyRepo userCompanyRepo;
     private final UserTokenRepo tokenRepo;
 
     public void saveUUID(UserToken userToken) {
