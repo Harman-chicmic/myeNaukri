@@ -2,7 +2,9 @@ package com.chicmic.eNaukri.config;
 
 import com.chicmic.eNaukri.filter.CustomAuthenticationFilter;
 import com.chicmic.eNaukri.filter.CustomAuthorizationFilter;
-import com.chicmic.eNaukri.Services.UsersService;
+import com.chicmic.eNaukri.service.UserServiceImpl;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -12,58 +14,51 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import static com.chicmic.eNaukri.ENaukriApplication.passwordEncoder;
+
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
-    private final UsersService userService;
 
     private final UserDetailsService userDetailsService;
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    @Autowired
+    private final UserServiceImpl userService;
+    @Bean
+    public DaoAuthenticationProvider daoAuthenticationProvider(){
+        DaoAuthenticationProvider authenticationProvider=new DaoAuthenticationProvider();
+        authenticationProvider.setUserDetailsService(userDetailsService);
+        authenticationProvider.setPasswordEncoder(passwordEncoder());
 
-
-
-    public SecurityConfig(UsersService userService, UserDetailsService userDetailsService, BCryptPasswordEncoder bCryptPasswordEncoder) {
-        this.userService = userService;
-        this.userDetailsService = userDetailsService;
-        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
-
+        return authenticationProvider;
     }
 
     @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService);
-        authProvider.setPasswordEncoder(NoOpPasswordEncoder.getInstance());
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
 
-        return authProvider;
-    }
+    //Filter objects
+        CustomAuthenticationFilter authenticationFilter=
+                new CustomAuthenticationFilter(userService,authenticationManager(http.getSharedObject(AuthenticationConfiguration.class)));
+        authenticationFilter.setFilterProcessesUrl("/login");
 
-
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        CustomAuthenticationFilter filter=new CustomAuthenticationFilter(userService, authenticationManager(http.getSharedObject(AuthenticationConfiguration.class)));
-        filter.setFilterProcessesUrl("/login");
-        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+    //csrf+session
         http.csrf().disable();
-        http.authorizeHttpRequests().requestMatchers("/login","/","/go/redirect","/hello").permitAll();
+        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+    //permits
+        http.authorizeHttpRequests().requestMatchers("/user/**").hasAnyAuthority("USER");
         http.authorizeHttpRequests().anyRequest().permitAll();
-        //http.authorizeHttpRequests().requestMatchers("/create/user").hasRole("ADMIN");//.hasAuthority("ADMIN");
-        //http.authorizeHttpRequests().requestMatchers("/add/product").hasRole("ADMIN");
-        //http.authorizeHttpRequests().requestMatchers("/accounts/facebook/login/callback").authenticated().and().oauth2Login();
-//        http.authorizeHttpRequests().anyRequest().permitAll();
-        //http.authorizeHttpRequests().requestMatchers("/create/user").permitAll();
-        //http.authorizeHttpRequests().requestMatchers("/add/product").permitAll();
-        //http.authorizeHttpRequests().requestMatchers("/hello").authenticated().and().oauth2Login().successHandler(oauthSuccesssHandler);
-        http.addFilter(filter);
 
+    //adding filters
         http.addFilterBefore(new CustomAuthorizationFilter(userService), UsernamePasswordAuthenticationFilter.class);
+        http.addFilter(authenticationFilter);
+
+    //building
         return http.build();
     }
+
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
