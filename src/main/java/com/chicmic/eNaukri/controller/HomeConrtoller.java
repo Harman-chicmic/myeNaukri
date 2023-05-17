@@ -14,7 +14,7 @@ public class HomeConrtoller {
     public void homePage(){
 
     }
-    @GetMapping("login")
+    @GetMapping("login-page")
     public void loginPage(){
 
     }
