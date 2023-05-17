@@ -61,7 +61,7 @@ public class PasswordResetService {
         passwordResetRequest.setToken(token1.toString());
         passwordResetRequest.setExpiryDate(LocalDateTime.now().plusMinutes(30));
         resetTokenRepo.save(passwordResetRequest);
-        String link1="http://localhost:8081/EnterNewPassword/"+token1+"/"+user.getEmail();
+        String link1="http://localhost:8081/enterNewPassword?v="+token1+"/"+user.getUuid();
         sendEmailForPassword(user.getEmail(), link1);
     }
     public void changeUserPassword(Users user, String password) {

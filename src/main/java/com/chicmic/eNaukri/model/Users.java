@@ -2,9 +2,7 @@ package com.chicmic.eNaukri.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.util.ArrayList;
@@ -14,8 +12,9 @@ import java.util.Set;
 
 @Data
 @Entity
-@RequiredArgsConstructor
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Users {
 
     @Id

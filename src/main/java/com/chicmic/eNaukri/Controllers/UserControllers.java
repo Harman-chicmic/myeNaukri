@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -47,13 +48,6 @@ public class UserControllers {
         String imgFolder = imagePath;
         String resumeFolder=resumePath;
         System.out.println(imagePath);
-        byte[] imgFileBytes = imgFile.getBytes();
-        byte[] resumeFileBytes= resumeFile.getBytes();
-        Path imgPath = Paths.get(imgFolder +  imgFile.getOriginalFilename());
-        Path resumePath=Paths.get(resumeFolder+resumeFile.getOriginalFilename());
-        logger.info(imgPath.toString()+resumePath.toString());
-        Files.write(imgPath, imgFileBytes);
-        Files.write(resumePath,resumeFileBytes);
         Users user=Users.builder()
                 .fullName(fullName)
                 .email(email)
@@ -61,9 +55,19 @@ public class UserControllers {
                 .password(password)
                 .uuid(userToken)
                 .bio(bio)
-                .ppPath("/static/assets/img" +imgFile.getOriginalFilename())
-                .cvPath("/static/assets/files" +resumeFile.getOriginalFilename())
                 .build();
+        if(!imgFile.isEmpty()&&!resumeFile.isEmpty()){
+            byte[] imgFileBytes = imgFile.getBytes();
+            byte[] resumeFileBytes= resumeFile.getBytes();
+            Path imgPath = Paths.get(imgFolder +  imgFile.getOriginalFilename());
+            Path resumePath=Paths.get(resumeFolder+resumeFile.getOriginalFilename());
+            logger.info(imgPath.toString()+resumePath.toString());
+            Files.write(imgPath, imgFileBytes);
+            Files.write(resumePath,resumeFileBytes);
+            user=Users.builder()
+                .ppPath("/static/assets/img" +imgFile.getOriginalFilename())
+                    .cvPath("/static/assets/files" +resumeFile.getOriginalFilename()).build();
+        }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         usersService.saveUser(user);
         usersService.register(user);
@@ -78,9 +82,9 @@ public class UserControllers {
         //String resetPasswordLink="http://localhost:8081/reset-email";
         passwordResetService.createPasswordResetTokenForUser(user);
     }
-    @GetMapping("/EnterNewPassword/{token}/{email}")
+    @GetMapping("/enterNewPassword/{token}/{uuid}")
     public String Enter(HttpServletRequest
-                                request, @PathVariable("token") String token, @PathVariable("email") String email, Model model) {
+                                request, @PathVariable("token") String token, @PathVariable("uuid") String uuid, Model model) {
         //String newPassword=request.getParameter("password");
         PasswordResetToken passwordResetRequest = passwordResetService.findByToken(token);
 //        User user= passwordResetRequest.getUser();
@@ -90,11 +94,11 @@ public class UserControllers {
         model.addAttribute("token", token);
         return "forgotPasswordForm";
     }
-    @PostMapping("/EnterNewPassword/{token}/{email}")
+    @PostMapping("/enterNewPassword/{token}/{uuid}")
     public String resetPassword(HttpServletRequest
-                                        request,@PathVariable("token") String token,@PathVariable("email") String email){
+                                        request,@PathVariable("token") String token,@PathVariable("uuid") String uuid){
         PasswordResetToken passwordResetRequest = passwordResetService.findByToken(token);
-        Users user = usersService.getUserByEmail(email);
+        Users user = usersService.getUserByUuid(uuid);
         System.out.println(user);
         String newPassword=request.getParameter("password");
         if (passwordResetRequest == null || passwordResetRequest.getExpiryDate().isBefore(LocalDateTime.now())) {
@@ -107,6 +111,25 @@ public class UserControllers {
         //return "redirect:/login?success=PasswordReset";
         return "user-login";
     }
-
-
+    @PostMapping("/updateProfile")
+    public String updateProfile(HttpServletRequest request,Model model, @RequestParam("resumeFile")MultipartFile resumeFile,@RequestParam("imgFile")MultipartFile imgFile) throws IOException {
+        String fullName = request.getParameter("fullName");
+        String email = request.getParameter("email");
+        String phoneNumber = (request.getParameter("phoneNumber"));
+        String currentCompany = request.getParameter("currentCompany");
+        String imgFolder = imagePath;
+        String resumeFolder=resumePath;
+        System.out.println(imagePath);
+        byte[] imgFileBytes = imgFile.getBytes();
+        byte[] resumeFileBytes= resumeFile.getBytes();
+        Path imgPath = Paths.get(imgFolder +  imgFile.getOriginalFilename());
+        Path resumePath=Paths.get(resumeFolder+resumeFile.getOriginalFilename());
+        logger.info(imgPath.toString()+resumePath.toString());
+        Files.write(imgPath, imgFileBytes);
+        Files.write(resumePath,resumeFileBytes);
+        String ppPath="/static/assets/img" +imgFile.getOriginalFilename();
+        String cvPath="/static/assets/files" +resumeFile.getOriginalFilename();
+        usersService.updateUser(fullName,phoneNumber,email,currentCompany,cvPath,ppPath);
+        return "myProfile";
+    }
 }

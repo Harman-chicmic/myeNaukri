@@ -18,6 +18,7 @@ import java.util.Random;
     public Users getUserByEmail(String email) {
         return usersRepo.findByEmail(email);
     }
+    public Users getUserByUuid(String uuid) { return usersRepo.findByUuid(uuid); }
 
     public void saveUser(Users user) {
         usersRepo.save(user);
@@ -27,7 +28,7 @@ import java.util.Random;
         return usersRepo.findByEmail(email);
     }
     @Async
-    public Users register(Users user) {
+    public void register(Users user) {
         // Generate OTP
         int otp = new Random().nextInt(999999);
         System.out.println(otp);
@@ -42,9 +43,9 @@ import java.util.Random;
         // Save user to database
         // ...
 
-        return user;
+//        return user;
     }
-    @Async("threadPoolTaskExecutor")
+
     private void sendEmailForOtp(String to, String subject, String body) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom("harmanjyot.singh@chicmic.co.in");
@@ -70,8 +71,23 @@ import java.util.Random;
             return false;
         }
     }
-//    public Users updateProfile(Users user){
-//
-//        user=usersRepo.findByEmail(email);
-//    }
+    public void updateUser(String fullName, String cvPath, String email, String phoneNumber, String currentCompany, String ppPath){
+        Users existingUser=usersRepo.findByEmail(email);
+        if(fullName!=null){
+            existingUser.setFullName(fullName);
+        }
+        if(phoneNumber!=null){
+            existingUser.setPhoneNumber(phoneNumber);
+        }
+        if (currentCompany!=null){
+            existingUser.setCurrentCompany(currentCompany);
+        }
+        if (cvPath!=null){
+            existingUser.setCvPath(cvPath);
+        }
+        if(ppPath!=null){
+            existingUser.setPpPath(ppPath);
+        }
+        usersRepo.save(existingUser);
+    }
 }
