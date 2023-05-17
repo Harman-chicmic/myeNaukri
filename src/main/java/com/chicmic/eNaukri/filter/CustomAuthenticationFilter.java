@@ -84,7 +84,7 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
         SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
 
     //redirecting
-        redirectUrl=(redirectUrl.trim().isEmpty())?"/user/profile/myapplications/":redirectUrl;
+        redirectUrl=(redirectUrl.trim().isEmpty())?"/login-page":redirectUrl;
         new DefaultRedirectStrategy().sendRedirect(request,response,redirectUrl);
     }
 

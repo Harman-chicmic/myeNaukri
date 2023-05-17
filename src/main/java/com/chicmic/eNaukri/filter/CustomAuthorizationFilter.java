@@ -19,7 +19,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 public class CustomAuthorizationFilter extends OncePerRequestFilter {
-    
+
     private UserServiceImpl userService;
     
     public  CustomAuthorizationFilter(UserServiceImpl userService){
@@ -27,7 +27,8 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
     }
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        
+        System.out.println(request.getServletPath());
+
         if(request.getServletPath().contains("/user/")){
 
             String token= null;

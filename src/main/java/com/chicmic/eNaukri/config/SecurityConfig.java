@@ -24,9 +24,9 @@ import static com.chicmic.eNaukri.ENaukriApplication.passwordEncoder;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private UserDetailsService userDetailsService;
+    private final UserDetailsService userDetailsService;
     @Autowired
-    private UserServiceImpl userService;
+    private final UserServiceImpl userService;
     @Bean
     public DaoAuthenticationProvider daoAuthenticationProvider(){
         DaoAuthenticationProvider authenticationProvider=new DaoAuthenticationProvider();
