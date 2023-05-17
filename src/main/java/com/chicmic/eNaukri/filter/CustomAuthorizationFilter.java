@@ -1,4 +1,4 @@
-package com.chicmic.eNaukri.CustomFilters;
+package com.chicmic.eNaukri.filter;
 
 //import com.example.JobPortal.Services.UsersService;
 import com.chicmic.eNaukri.Services.UsersService;
@@ -12,11 +12,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Slf4j
-public class AuthorizationFilter extends OncePerRequestFilter {
+public class CustomAuthorizationFilter extends OncePerRequestFilter {
     private final UsersService userService;
 
 
-    public AuthorizationFilter(UsersService userService) {
+    public CustomAuthorizationFilter(UsersService userService) {
         this.userService=userService;
     }
 

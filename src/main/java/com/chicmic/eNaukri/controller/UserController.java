@@ -38,7 +38,6 @@ public class UserController {
     }
     @PostMapping("{id}/myapplications/withdraw")
     public void withdrawApxn(@RequestParam String job){
-
     }
 
 }

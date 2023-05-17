@@ -33,6 +33,7 @@ public class Users {
     @UuidGenerator
     private String uuid;
     private String link;
+    boolean otpVerified;
 
 //mappings
 

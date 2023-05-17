@@ -30,7 +30,7 @@ import java.util.Random;
     @Async
     public void register(Users user) {
         // Generate OTP
-        int otp = new Random().nextInt(999999);
+        String otp =Integer.toString(new Random().nextInt(999999));
         System.out.println(otp);
 
         // Send OTP to user's email
@@ -54,7 +54,7 @@ import java.util.Random;
         message.setText(body);
         javaMailSender.send(message);
     }
-    public boolean verify(String email, int otp) {
+    public boolean verify(String email, String otp) {
         // Get user by email
         Users user = usersRepo.findByEmail(email);
         if (user == null) {
@@ -62,7 +62,7 @@ import java.util.Random;
         }
 
         // Check if OTP is correct
-        if (user.getOtp() == otp) {
+        if (user.getOtp().equals(otp)) {
             // Update user's OTP status to verified
             user.setOtpVerified(true);
             //userRepository.save(user);

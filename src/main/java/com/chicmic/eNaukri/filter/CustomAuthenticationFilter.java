@@ -1,7 +1,6 @@
-package com.chicmic.eNaukri.CustomFilters;
+package com.chicmic.eNaukri.filter;
 
 import com.chicmic.eNaukri.Services.UsersService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,14 +11,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
-import java.util.UUID;
 
-public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
+public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private UsersService userService;
     private final AuthenticationManager authenticationManager; //manager provider
 
-    public AuthenticationFilter(UsersService userService, AuthenticationManager authenticationManager) {
+    public CustomAuthenticationFilter(UsersService userService, AuthenticationManager authenticationManager) {
         this.userService = userService;
         this.authenticationManager= authenticationManager;
     }

@@ -1,7 +1,7 @@
-package com.chicmic.eNaukri.Configurations;
+package com.chicmic.eNaukri.config;
 
-import com.chicmic.eNaukri.CustomFilters.AuthenticationFilter;
-import com.chicmic.eNaukri.CustomFilters.AuthorizationFilter;
+import com.chicmic.eNaukri.filter.CustomAuthenticationFilter;
+import com.chicmic.eNaukri.filter.CustomAuthorizationFilter;
 import com.chicmic.eNaukri.Services.UsersService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,7 +46,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        AuthenticationFilter filter=new AuthenticationFilter(userService, authenticationManager(http.getSharedObject(AuthenticationConfiguration.class)));
+        CustomAuthenticationFilter filter=new CustomAuthenticationFilter(userService, authenticationManager(http.getSharedObject(AuthenticationConfiguration.class)));
         filter.setFilterProcessesUrl("/login");
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.csrf().disable();
@@ -61,7 +61,7 @@ public class SecurityConfig {
         //http.authorizeHttpRequests().requestMatchers("/hello").authenticated().and().oauth2Login().successHandler(oauthSuccesssHandler);
         http.addFilter(filter);
 
-        http.addFilterBefore(new AuthorizationFilter(userService), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(new CustomAuthorizationFilter(userService), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
     @Bean
