@@ -21,6 +21,7 @@ public class Users {
     private Long userId;
 
     private String fullName;
+    private String username;
     private String email;
     private String password;
     private String phoneNumber;
