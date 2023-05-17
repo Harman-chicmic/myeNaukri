@@ -1,5 +1,6 @@
 package com.chicmic.eNaukri.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -26,8 +27,9 @@ public class Company {
     @OneToMany(mappedBy = "postFor", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
     private List<Job> jobList=new ArrayList<>();
 
-    @OneToMany(mappedBy = "usersCompany",orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<UserCompany> userCompanyList=new ArrayList<>();
+    @OneToMany(mappedBy = "exCompany", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Experience> experienceList=new ArrayList<>();
 
     @OneToOne(mappedBy = "companyLinks",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     private SocialLink socialLink;

@@ -3,7 +3,6 @@ package com.chicmic.eNaukri.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.beans.factory.annotation.Autowired;
 
 
 @Entity
@@ -14,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class UserToken {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long userTokenId;
 
     private String token;
