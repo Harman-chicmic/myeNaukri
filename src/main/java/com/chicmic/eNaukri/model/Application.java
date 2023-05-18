@@ -17,6 +17,7 @@ public class Application {
     private String cvPath;
     private boolean priority;
     private boolean favourite;
+    private boolean withdraw;
     @ManyToOne
     @JsonIgnore
     private Users applicantId;
