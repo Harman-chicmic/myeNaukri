@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 public interface UsersRepo extends JpaRepository< Users,Long> {
     public Users findByEmail(String email);
     public Users findByUuid(String uuid);
-//    public Users findById(long id);
+    public Users findByUserId(long id);
 @Transactional
 @Modifying
 @Query(value=

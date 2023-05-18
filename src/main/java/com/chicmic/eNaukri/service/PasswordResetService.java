@@ -1,4 +1,4 @@
-package com.chicmic.eNaukri.Services;
+package com.chicmic.eNaukri.service;
 
 import com.chicmic.eNaukri.model.PasswordResetToken;
 import com.chicmic.eNaukri.model.Users;

@@ -1,6 +1,7 @@
-package com.chicmic.eNaukri.Controllers;
-import com.chicmic.eNaukri.Services.PasswordResetService;
-import com.chicmic.eNaukri.Services.UsersService;
+package com.chicmic.eNaukri.controller;
+import com.chicmic.eNaukri.Dto.UsersDto;
+import com.chicmic.eNaukri.service.PasswordResetService;
+import com.chicmic.eNaukri.service.UsersService;
 import com.chicmic.eNaukri.model.PasswordResetToken;
 import com.chicmic.eNaukri.model.Users;
 import jakarta.mail.MessagingException;
@@ -9,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -37,14 +37,14 @@ public class UserControllers {
 
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
-    public String register(HttpServletRequest request,@RequestParam("imgUrl") MultipartFile imgFile,
+    public String register(UsersDto dto,@RequestParam("imgUrl") MultipartFile imgFile,
                            @RequestParam("resumeUrl") MultipartFile resumeFile) throws IOException {
         String userToken=UUID.randomUUID().toString();
-        String fullName=request.getParameter("fullName");
-        String email= request.getParameter("email");
-        String phone=request.getParameter("phone");
-        String password=request.getParameter("password");
-        String bio=request.getParameter("bio");
+        String fullName=dto.getFullName();
+        String email= dto.getEmail();
+        String phone=dto.getPhoneNumber();
+        String password=dto.getPassword();
+        String bio=dto.getBio();
         String imgFolder = imagePath;
         String resumeFolder=resumePath;
         System.out.println(imagePath);
@@ -112,24 +112,7 @@ public class UserControllers {
         return "user-login";
     }
     @PostMapping("/updateProfile")
-    public String updateProfile(HttpServletRequest request,Model model, @RequestParam("resumeFile")MultipartFile resumeFile,@RequestParam("imgFile")MultipartFile imgFile) throws IOException {
-        String fullName = request.getParameter("fullName");
-        String email = request.getParameter("email");
-        String phoneNumber = (request.getParameter("phoneNumber"));
-        String currentCompany = request.getParameter("currentCompany");
-        String imgFolder = imagePath;
-        String resumeFolder=resumePath;
-        System.out.println(imagePath);
-        byte[] imgFileBytes = imgFile.getBytes();
-        byte[] resumeFileBytes= resumeFile.getBytes();
-        Path imgPath = Paths.get(imgFolder +  imgFile.getOriginalFilename());
-        Path resumePath=Paths.get(resumeFolder+resumeFile.getOriginalFilename());
-        logger.info(imgPath.toString()+resumePath.toString());
-        Files.write(imgPath, imgFileBytes);
-        Files.write(resumePath,resumeFileBytes);
-        String ppPath="/static/assets/img" +imgFile.getOriginalFilename();
-        String cvPath="/static/assets/files" +resumeFile.getOriginalFilename();
-        usersService.updateUser(fullName,phoneNumber,email,currentCompany,cvPath,ppPath);
-        return "myProfile";
+    public void updateProfile(UsersDto user, @RequestParam("resumeFile")MultipartFile resumeFile, @RequestParam("imgFile")MultipartFile imgFile) throws IOException {
+        usersService.updateUser(user,imgFile,resumeFile);
     }
 }

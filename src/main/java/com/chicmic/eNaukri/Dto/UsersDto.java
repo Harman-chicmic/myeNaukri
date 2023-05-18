@@ -11,10 +11,8 @@ import org.springframework.web.multipart.MultipartFile;
 
     private String fullName;
     private String email;
-    private String password;
     private String phoneNumber;
     private String currentCompany;
-    private MultipartFile resumeUrl;
     private String bio;
-    private MultipartFile imgUrl;
+    private String password;
 }

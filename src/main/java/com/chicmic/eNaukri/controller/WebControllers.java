@@ -1,4 +1,4 @@
-package com.chicmic.eNaukri.Controllers;
+package com.chicmic.eNaukri.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

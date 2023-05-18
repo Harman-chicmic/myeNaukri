@@ -15,7 +15,6 @@ public class Experience {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long expId;
-
     private String role;
     private String roleDesc;
     private boolean currentlyWorking;
