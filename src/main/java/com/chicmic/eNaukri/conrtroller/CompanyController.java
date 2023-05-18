@@ -1,4 +1,4 @@
-package com.chicmic.eNaukri.conrtoller;
+package com.chicmic.eNaukri.conrtroller;
 
 import com.chicmic.eNaukri.model.Company;
 import com.chicmic.eNaukri.model.Job;

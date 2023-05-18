@@ -1,5 +1,6 @@
-package com.chicmic.eNaukri.conrtoller;
+package com.chicmic.eNaukri.conrtroller;
 
+import com.chicmic.eNaukri.model.Job;
 import com.chicmic.eNaukri.repo.UsersRepo;
 import com.chicmic.eNaukri.service.UserServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
@@ -7,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 
@@ -49,5 +51,13 @@ public class HomeController {
     @PostMapping("forgot-password")
     public boolean sendForgotPaswdLink(@RequestParam String email){
         return true;
+    }
+    @GetMapping("jobs")
+    public List<Job> displayJobs(@RequestParam(required = false,name = "q") String query,
+                                 @RequestParam(required = false,name = "location") String location,
+                                 @RequestParam(required = false,name = "type") String jobType,
+                                 @RequestParam(required = false,name = "postedOn") String postedOn,
+                                 @RequestParam(required = false,name = "remoteHybridOnsite") String remoteHybridOnsite){
+        return userService.displayFilteredPaginatedJobs(query,location,jobType,postedOn,remoteHybridOnsite);
     }
 }
