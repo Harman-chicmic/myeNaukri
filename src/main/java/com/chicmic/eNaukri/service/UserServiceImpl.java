@@ -101,7 +101,32 @@ public class UserServiceImpl implements UserDetailsService {
         jobRepo.save(newJob);
     }
 
-//    public List<Job> displayFilteredPaginatedJobs(String query, String location, String jobType, String postedOn, String remoteHybridOnsite) {
+
+    public List<Job> displayFilteredPaginatedJobs(String query, String location, String jobType, String postedOn, String remoteHybridOnsite) {
+        boolean flag=true;
+        CriteriaBuilder cb=entityManager.getCriteriaBuilder();
+        CriteriaQuery<Job> criteriaQuery= cb.createQuery(Job.class);
+
+        Root<Job> root=criteriaQuery.from(Job.class);
+
+            if(!StringUtils.isEmpty(query)){
+                criteriaQuery.where(cb.and( cb.like(root.get("jobTitle"),"%" +query+ "%"),cb.isTrue(root.get("active"))));
+                criteriaQuery.where(cb.and( cb.like(root.get("jobDesc"),"%" +query+ "%"),cb.isTrue(root.get("active"))));
+            }
+            if(!StringUtils.isEmpty(location))criteriaQuery.where(cb.and( cb.like(root.get("location"),location),cb.isTrue(root.get("active"))));
+            if(!StringUtils.isEmpty(postedOn))criteriaQuery.where(cb.and( cb.like(root.get("postedOn"),postedOn),cb.isTrue(root.get("active"))));
+            if(!StringUtils.isEmpty(jobType))criteriaQuery.where(cb.and( cb.like(root.get("jobType"),jobType),cb.isTrue(root.get("active"))));
+            if(!StringUtils.isEmpty(remoteHybridOnsite))criteriaQuery.where(cb.and( cb.like(root.get("remoteHybridOnsite"),remoteHybridOnsite),cb.isTrue(root.get("active"))));
+
+    //pagination
+        TypedQuery<Job> typedQuery=entityManager.createQuery(criteriaQuery.where(cb.isTrue(root.get("active"))));
+        typedQuery.setFirstResult(0);
+        typedQuery.setMaxResults(5);
+
+        return typedQuery.getResultList();
+
+    }
+    //    public List<Job> displayFilteredPaginatedJobs(String query, String location, String jobType, String postedOn, String remoteHybridOnsite) {
 //
 //
 //        if(StringUtils.isEmpty(query)&&StringUtils.isEmpty(location)&&StringUtils.isEmpty(jobType)&&StringUtils.isEmpty(postedOn)&&StringUtils.isEmpty(remoteHybridOnsite)){
@@ -139,29 +164,4 @@ public class UserServiceImpl implements UserDetailsService {
 //
 //        }
 //    }
-
-    public List<Job> displayFilteredPaginatedJobs(String query, String location, String jobType, String postedOn, String remoteHybridOnsite) {
-        boolean flag=true;
-        CriteriaBuilder cb=entityManager.getCriteriaBuilder();
-        CriteriaQuery<Job> criteriaQuery= cb.createQuery(Job.class);
-
-        Root<Job> root=criteriaQuery.from(Job.class);
-
-            if(!StringUtils.isEmpty(query)){
-                criteriaQuery.where(cb.and( cb.like(root.get("jobTitle"),"%" +query+ "%"),cb.isTrue(root.get("active"))));
-                criteriaQuery.where(cb.and( cb.like(root.get("jobDesc"),"%" +query+ "%"),cb.isTrue(root.get("active"))));
-            }
-            if(!StringUtils.isEmpty(location))criteriaQuery.where(cb.and( cb.like(root.get("location"),location),cb.isTrue(root.get("active"))));
-            if(!StringUtils.isEmpty(postedOn))criteriaQuery.where(cb.and( cb.like(root.get("postedOn"),postedOn),cb.isTrue(root.get("active"))));
-            if(!StringUtils.isEmpty(jobType))criteriaQuery.where(cb.and( cb.like(root.get("jobType"),jobType),cb.isTrue(root.get("active"))));
-            if(!StringUtils.isEmpty(remoteHybridOnsite))criteriaQuery.where(cb.and( cb.like(root.get("remoteHybridOnsite"),remoteHybridOnsite),cb.isTrue(root.get("active"))));
-
-    //pagination
-        TypedQuery<Job> typedQuery=entityManager.createQuery(criteriaQuery.where(cb.isTrue(root.get("active"))));
-        typedQuery.setFirstResult(0);
-        typedQuery.setMaxResults(5);
-
-        return typedQuery.getResultList();
-
-    }
 }
