@@ -1,4 +1,4 @@
-package com.chicmic.eNaukri.conrtroller;
+package com.chicmic.eNaukri.controller;
 
 import com.chicmic.eNaukri.model.Job;
 import com.chicmic.eNaukri.service.UserServiceImpl;
