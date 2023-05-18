@@ -24,6 +24,9 @@ public class Job {
     private Long jobId;
 
     private String jobTitle;
+    private String location;
+    private String jobType;
+    private String remoteHybridOnsite;
     private String jobDesc;
     private LocalDate postedOn;
     private LocalDate updatedOn;
@@ -33,6 +36,9 @@ public class Job {
 //mappings
     @OneToMany(mappedBy = "jobId", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     private List<Application> applicationList =new ArrayList<>();
+
+    @OneToMany(mappedBy = "job", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    private List<JobSkills> jobSkillsList =new ArrayList<>();
 
     @ManyToOne(cascade = CascadeType.REMOVE)
     @JsonIgnore

@@ -8,19 +8,16 @@ import lombok.RequiredArgsConstructor;
 @Entity
 @Data
 @RequiredArgsConstructor
-public class Application {
-
+public class JobSkills {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long applicationId;
+    private Long jobSkillId;
 
-    private String cvPath;
-    private boolean priority;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JsonIgnore
-    private Users applicantId;
+    private Job job;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JsonIgnore
-    private Job jobId;
+    private Skills jobSkill;
 }
