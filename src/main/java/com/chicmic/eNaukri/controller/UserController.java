@@ -1,4 +1,4 @@
-package com.chicmic.eNaukri.conrtoller;
+package com.chicmic.eNaukri.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
