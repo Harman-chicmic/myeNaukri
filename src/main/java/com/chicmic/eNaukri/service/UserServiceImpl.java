@@ -35,34 +35,6 @@ public class UserServiceImpl implements UserDetailsService {
     private final CompanyRepo companyRepo;
     private final UserTokenRepo tokenRepo;
 
-    public void saveUUID(UserToken userToken) {
-        tokenRepo.save(userToken);
-    }
-
-    public Users getUserByEmail(String username) {
-        return usersRepo.findByEmail(username);
-    }
-
-    public Users findUserFromUUID(String token) {
-        UserToken userToken= tokenRepo.findByToken(token);
-        return usersRepo.findById(userToken.getUserr().getUserId()).get();
-    }
-
-    public void logout(HttpServletRequest request, HttpServletResponse response) {
-
-        Cookie[] cookies=request.getCookies();
-        if(cookies!=null){
-            for(Cookie cookie:cookies){
-                if("AuthHeader".equals(cookie.getName())){
-                    tokenRepo.deleteByToken(cookie.getValue());
-                    cookie.setValue(null);
-                    cookie.setMaxAge(0);
-                    cookie.setPath("/");
-                    response.addCookie(cookie);break;
-                }
-            }
-        }
-    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -76,19 +48,5 @@ public class UserServiceImpl implements UserDetailsService {
         return new User(user.getEmail(),user.getPassword(),authorites);
     }
 
-    public String findCurrentCompany(Long id) {
-        Users users=usersRepo.findById(id).get();
-       return experienceRepo.findByExpUserAndCurrentlyWorking(users,true).getExCompany().getCompanyName();
-    }
 
-    public void saveJob(Job job, String postedFor) {
-        Job newJob=new Job();
-        newJob.setJobTitle(job.getJobTitle());
-        newJob.setJobDesc(job.getJobDesc());
-        newJob.setActive(true);
-        newJob.setPostedOn(LocalDate.now());
-        newJob.setExpiresAt(job.getExpiresAt());
-        newJob.setPostFor(companyRepo.findByCompanyName(postedFor.trim()));
-        jobRepo.save(newJob);
-    }
 }
