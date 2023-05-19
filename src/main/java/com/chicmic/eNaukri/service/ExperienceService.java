@@ -7,6 +7,8 @@ import com.chicmic.eNaukri.model.Experience;
 import com.chicmic.eNaukri.model.UserExperience;
 import com.chicmic.eNaukri.model.Users;
 import com.chicmic.eNaukri.repo.CompanyRepo;
+import com.chicmic.eNaukri.repo.ExperienceRepo;
+import com.chicmic.eNaukri.repo.UserExperienceRepo;
 import com.chicmic.eNaukri.repo.UsersRepo;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,6 +20,10 @@ import org.springframework.stereotype.Service;
     UsersRepo usersRepo;
     @Autowired
     CompanyRepo companyRepo;
+    @Autowired
+    ExperienceRepo experienceRepo;
+    @Autowired
+    UserExperienceRepo userExperienceRepo;
     public void addExperience(Long userId, UserExperienceDto dto){
         Users user=usersRepo.findByUserId(userId);
         ObjectMapper mapper = new ObjectMapper();
@@ -27,5 +33,7 @@ import org.springframework.stereotype.Service;
         UserExperience userExperience=new UserExperience();
         userExperience.setExperience(experience);
         userExperience.setUser(user);
+        experienceRepo.save(experience);
+        userExperienceRepo.save(userExperience);
     }
 }

@@ -3,17 +3,17 @@ package com.chicmic.eNaukri.controller;
 import com.chicmic.eNaukri.Dto.UserEducationDto;
 import com.chicmic.eNaukri.Dto.UserExperienceDto;
 import com.chicmic.eNaukri.Dto.UserSkillDto;
+import com.chicmic.eNaukri.model.Application;
 import com.chicmic.eNaukri.model.Education;
 import com.chicmic.eNaukri.model.Users;
-import com.chicmic.eNaukri.service.EducationService;
-import com.chicmic.eNaukri.service.ExperienceService;
-import com.chicmic.eNaukri.service.SkillsService;
-import com.chicmic.eNaukri.service.UsersService;
+import com.chicmic.eNaukri.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Map;
 
 @RestController
@@ -28,6 +28,8 @@ public class UserController {
     EducationService educationService;
     @Autowired
     ExperienceService experienceService;
+    @Autowired
+    ApplicationService applicationService;
 
     @GetMapping("{id}")
     public void getUser(){
@@ -76,6 +78,13 @@ public class UserController {
             @PathVariable Long userId,
             @RequestBody UserExperienceDto dto) {
         experienceService.addExperience(userId,dto);
+        return ResponseEntity.ok("Experience added to the user");
+    }
+    @PostMapping("/{userId}/{jobId}/apply")
+    public ResponseEntity<String> apply(
+            @PathVariable Long userId, @PathVariable Long jobId,
+            MultipartFile resumeFile, @RequestBody Application application)throws IOException {
+        applicationService.applyForJob(application,resumeFile,userId,jobId);
         return ResponseEntity.ok("Experience added to the user");
     }
 }

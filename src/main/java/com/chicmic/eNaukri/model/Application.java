@@ -15,6 +15,11 @@ public class Application {
     private Long applicationId;
 
     private String cvPath;
+    private int noticePeriod;
+    private String fullName;
+    private String email;
+    private String phoneNumber;
+    private boolean withdraw;
 
     @ManyToOne
     @JsonIgnore

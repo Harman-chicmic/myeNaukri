@@ -1,12 +1,11 @@
 package com.chicmic.eNaukri.service;
 
-import com.chicmic.eNaukri.model.Authority;
-import com.chicmic.eNaukri.model.UserToken;
-import com.chicmic.eNaukri.model.Users;
+import com.chicmic.eNaukri.model.*;
 import com.chicmic.eNaukri.repo.*;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -16,18 +15,24 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 @Service
 @Slf4j
+@Transactional
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserDetailsService {
 
     private final UsersRepo usersRepo;
     private final ApplicationRepo applicationRepo;
     private final JobRepo jobRepo;
+    private final ExperienceRepo experienceRepo;
     private final SkillsRepo skillsRepo;
+    private final CompanyRepo companyRepo;
     private final UserTokenRepo tokenRepo;
 
     public void saveUUID(UserToken userToken) {
@@ -69,5 +74,21 @@ public class UserServiceImpl implements UserDetailsService {
         authorites.add(new Authority("USER"));
 
         return new User(user.getEmail(),user.getPassword(),authorites);
+    }
+
+    public String findCurrentCompany(Long id) {
+        Users users=usersRepo.findById(id).get();
+       return experienceRepo.findByExpUserAndCurrentlyWorking(users,true).getExCompany().getCompanyName();
+    }
+
+    public void saveJob(Job job, String postedFor) {
+        Job newJob=new Job();
+        newJob.setJobTitle(job.getJobTitle());
+        newJob.setJobDesc(job.getJobDesc());
+        newJob.setActive(true);
+        newJob.setPostedOn(LocalDate.now());
+        newJob.setExpiresAt(job.getExpiresAt());
+        newJob.setPostFor(companyRepo.findByCompanyName(postedFor.trim()));
+        jobRepo.save(newJob);
     }
 }

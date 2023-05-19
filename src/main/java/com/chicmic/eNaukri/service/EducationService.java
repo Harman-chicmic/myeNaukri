@@ -24,5 +24,6 @@ import org.springframework.stereotype.Service;
         UserEducation userEducation=new UserEducation();
         userEducation.setEducation(education);
         userEducation.setUser(user);
+        educationRepo.save(education);
     }
 }

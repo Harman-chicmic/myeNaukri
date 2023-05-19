@@ -1,8 +1,6 @@
 package com.chicmic.eNaukri.filter;
 
-import com.chicmic.eNaukri.model.Authority;
-import com.chicmic.eNaukri.model.UserToken;
-import com.chicmic.eNaukri.model.Users;
+import com.chicmic.eNaukri.model.*;
 import com.chicmic.eNaukri.service.UserServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

@@ -45,7 +45,7 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
                 prevUrl.setMaxAge(60*10);
                 response.addCookie(prevUrl);
 
-                String redirectUrl="/login/user";
+                String redirectUrl="/login/page";
                 new DefaultRedirectStrategy().sendRedirect(request,response,redirectUrl);
 //                throw new CustomApiExceptionHandler(HttpStatus.BAD_REQUEST,"Please give Valid Token id");
 
