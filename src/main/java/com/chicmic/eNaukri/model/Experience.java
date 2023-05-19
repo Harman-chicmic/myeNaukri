@@ -18,9 +18,7 @@ public class Experience {
     private String role;
     private String roleDesc;
     private boolean currentlyWorking;
-    @JsonFormat(pattern="yyyy/mm/dd")
     private LocalDate joinedOn;
-    @JsonFormat(pattern="yyyy/mm/dd")
     private LocalDate endedOn;
 
     @ManyToOne

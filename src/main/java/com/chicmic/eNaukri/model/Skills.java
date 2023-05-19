@@ -20,4 +20,7 @@ public class Skills {
     @OneToMany(mappedBy = "skills",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     private List<UserSkills> userSkillsList=new ArrayList<>();
 
+    @OneToMany(mappedBy = "jobSkill",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    private List<JobSkills> jobSkillsList=new ArrayList<>();
+
 }

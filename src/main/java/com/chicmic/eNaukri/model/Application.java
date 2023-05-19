@@ -15,6 +15,8 @@ public class Application {
     private Long applicationId;
 
     private String cvPath;
+    private boolean priority;
+    private boolean withdraw;
     private int noticePeriod;
     private String fullName;
     private String email;
