@@ -36,6 +36,8 @@ public class Users {
     @UuidGenerator
     private String uuid;
     private String link;
+    private boolean isVerified;
+    private boolean enableNotification;
 
 //mappings
 
