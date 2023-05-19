@@ -1,16 +1,15 @@
-<<<<<<< HEAD
-package com.chicmic.eNaukri.conrtoller;
+
+package com.chicmic.eNaukri.controller;
 
 import com.chicmic.eNaukri.model.Job;
 import com.chicmic.eNaukri.service.JobService;
 import com.chicmic.eNaukri.service.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-=======
-package com.chicmic.eNaukri.controller;
+
+
 
 import lombok.RequiredArgsConstructor;
->>>>>>> origin/login-logout
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
