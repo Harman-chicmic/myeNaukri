@@ -81,14 +81,5 @@ public class UserServiceImpl implements UserDetailsService {
        return experienceRepo.findByExpUserAndCurrentlyWorking(users,true).getExCompany().getCompanyName();
     }
 
-    public void saveJob(Job job, String postedFor) {
-        Job newJob=new Job();
-        newJob.setJobTitle(job.getJobTitle());
-        newJob.setJobDesc(job.getJobDesc());
-        newJob.setActive(true);
-        newJob.setPostedOn(LocalDate.now());
-        newJob.setExpiresAt(job.getExpiresAt());
-        newJob.setPostFor(companyRepo.findByCompanyName(postedFor.trim()));
-        jobRepo.save(newJob);
-    }
+
 }

@@ -85,6 +85,6 @@ public class UserController {
             @PathVariable Long userId, @PathVariable Long jobId,
             MultipartFile resumeFile, @RequestBody Application application)throws IOException {
         applicationService.applyForJob(application,resumeFile,userId,jobId);
-        return ResponseEntity.ok("Experience added to the user");
+        return ResponseEntity.ok("Successfully applied to the user");
     }
 }
