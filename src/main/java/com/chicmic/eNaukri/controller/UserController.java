@@ -9,6 +9,7 @@ import com.chicmic.eNaukri.model.Users;
 import com.chicmic.eNaukri.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,6 +21,7 @@ import java.util.Map;
 @RequestMapping("/user/")
 @RequiredArgsConstructor
 public class UserController {
+
     @Autowired
     UsersService usersService;
     @Autowired
@@ -51,9 +53,10 @@ public class UserController {
     public void addExperience(){
 
     }
-    @GetMapping("{id}/myapplications")
-    public void myApplications(){
-
+    @GetMapping("{userId}/myapplications")
+    public ResponseEntity<String> myApplications(@PathVariable Long userId){
+        applicationService.viewApplications(userId);
+        return ResponseEntity.ok("list of your applications");
     }
     @PostMapping("{id}/myapplications/withdraw")
     public void withdrawApxn(@RequestParam String job){

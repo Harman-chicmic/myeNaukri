@@ -2,6 +2,12 @@ package com.chicmic.eNaukri.service;
 
 import com.chicmic.eNaukri.model.*;
 import com.chicmic.eNaukri.repo.*;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,6 +20,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -34,6 +41,8 @@ public class UserServiceImpl implements UserDetailsService {
     private final SkillsRepo skillsRepo;
     private final CompanyRepo companyRepo;
     private final UserTokenRepo tokenRepo;
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public void saveUUID(UserToken userToken) {
         tokenRepo.save(userToken);

@@ -2,9 +2,7 @@ package com.chicmic.eNaukri.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.util.ArrayList;
@@ -14,10 +12,10 @@ import java.util.Set;
 
 @Data
 @Entity
-@RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class Users {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
@@ -32,6 +30,7 @@ public class Users {
     private String bio;
     private String ppPath;
     private String otp;
+    private boolean enableNotification;
     @UuidGenerator
     private String uuid;
     private String link;

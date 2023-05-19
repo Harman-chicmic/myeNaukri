@@ -52,9 +52,10 @@ public class UserControllers {
                 .fullName(fullName)
                 .email(email)
                 .phoneNumber(phone)
-                .password(password)
+                .password(passwordEncoder.encode(password))
                 .uuid(userToken)
                 .bio(bio)
+                .enableNotification(true)
                 .build();
         if(!imgFile.isEmpty()&&!resumeFile.isEmpty()){
             byte[] imgFileBytes = imgFile.getBytes();
@@ -68,7 +69,6 @@ public class UserControllers {
                 .ppPath("/static/assets/img" +imgFile.getOriginalFilename())
                     .cvPath("/static/assets/files" +resumeFile.getOriginalFilename()).build();
         }
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
         usersService.saveUser(user);
         usersService.register(user);
         System.out.println("lalalalalala");

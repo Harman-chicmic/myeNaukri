@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 @Service public class ApplicationService {
     public static final String resumePath = "/home/chicmic/Downloads/JobPortal/src/main/resources/static/assets/files/";
@@ -41,5 +42,10 @@ import java.nio.file.Paths;
             jobApplication.setCvPath(cvPath);
         }
         applicationRepo.save(jobApplication);
+    }
+    public List<Application> viewApplications(Long userId){
+        Users user = usersRepo.findById(userId).get();
+        List<Application> applications=user.getApplicationList();
+        return applications;
     }
 }
