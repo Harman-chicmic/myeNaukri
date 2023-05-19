@@ -2,22 +2,28 @@ package com.chicmic.eNaukri.service;
 
 import com.chicmic.eNaukri.model.*;
 import com.chicmic.eNaukri.repo.*;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.util.StringUtils;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -34,6 +40,9 @@ public class UserServiceImpl implements UserDetailsService {
     private final SkillsRepo skillsRepo;
     private final CompanyRepo companyRepo;
     private final UserTokenRepo tokenRepo;
+    private final JobSkillsRepo jobSkillsRepo;
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public void saveUUID(UserToken userToken) {
         tokenRepo.save(userToken);
@@ -81,14 +90,25 @@ public class UserServiceImpl implements UserDetailsService {
        return experienceRepo.findByExpUserAndCurrentlyWorking(users,true).getExCompany().getCompanyName();
     }
 
-    public void saveJob(Job job, String postedFor) {
-        Job newJob=new Job();
-        newJob.setJobTitle(job.getJobTitle());
-        newJob.setJobDesc(job.getJobDesc());
-        newJob.setActive(true);
-        newJob.setPostedOn(LocalDate.now());
-        newJob.setExpiresAt(job.getExpiresAt());
-        newJob.setPostFor(companyRepo.findByCompanyName(postedFor.trim()));
-        jobRepo.save(newJob);
+
+    public void changeAlerts(Long id, boolean b) {
+        Users temp=usersRepo.findById(id).get();
+        temp.setEnableNotification(b);
+        usersRepo.save(temp);
+    }
+
+    public boolean checkJobForuser(Long id, Long jobId) {
+        Users temp=usersRepo.findById(id).get();
+        Job job=jobRepo.findById(jobId).get();
+        return applicationRepo.existsByApplicantIdAndJobId(temp,job);
+    }
+
+    public void withdrawApxn(Long id, Long jobId) {
+        Users temp=usersRepo.findById(id).get();
+        Job job=jobRepo.findById(jobId).get();
+
+        Application application= applicationRepo.findByApplicantIdAndJobId(temp,job);
+        application.setWithdraw(true);
+        applicationRepo.save(application);
     }
 }
