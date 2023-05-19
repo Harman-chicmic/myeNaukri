@@ -7,8 +7,10 @@ import com.chicmic.eNaukri.service.UserServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -62,5 +64,10 @@ public class HomeController {
                                  @RequestParam(required = false,name = "postedOn") String postedOn,
                                  @RequestParam(required = false,name = "remoteHybridOnsite") String remoteHybridOnsite){
         return jobService.displayFilteredPaginatedJobs(query,location,jobType,postedOn,remoteHybridOnsite);
+    }
+
+    @GetMapping("{jobId}/listInterestedApplicants")
+    public Collection<?> listInterestedApplicants(@PathVariable("jobId")Long jobId){
+        return jobService.listInterestedApplicants(jobId);
     }
 }

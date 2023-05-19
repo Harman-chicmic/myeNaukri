@@ -29,10 +29,6 @@ public class UserController {
     public void updateUser(@PathVariable Long id,@RequestBody Map<Object,Object> map){
 
     }
-    @GetMapping("{id}/myapplications")
-    public void myApplications(@PathVariable Long id){
-
-    }
     @PostMapping("{id}/job/{jobId}/withdraw")
     public ResponseEntity<?> withdrawApxn(@PathVariable("id") Long id,@PathVariable("jobId") Long jobId){
         if(userService.checkJobForuser(id,jobId)){

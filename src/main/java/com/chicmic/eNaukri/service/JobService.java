@@ -1,10 +1,7 @@
 package com.chicmic.eNaukri.service;
 
-import com.chicmic.eNaukri.model.Company;
-import com.chicmic.eNaukri.model.Job;
-import com.chicmic.eNaukri.repo.CompanyRepo;
-import com.chicmic.eNaukri.repo.JobRepo;
-import com.chicmic.eNaukri.repo.UsersRepo;
+import com.chicmic.eNaukri.model.*;
+import com.chicmic.eNaukri.repo.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
@@ -18,8 +15,7 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.util.StringUtils;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -28,6 +24,8 @@ public class JobService {
     private final JobRepo jobRepo;
     private final UsersRepo usersRepo;
     private final CompanyRepo companyRepo;
+    private final JobSkillsRepo jobSkillsRepo;
+    private final UserSkillsRepo userSkillsRepo;
     @PersistenceContext
     private EntityManager entityManager;
     public void saveJob(Job job, String postedFor) {
@@ -79,4 +77,20 @@ public class JobService {
 
     }
 
+    public Collection<?> listInterestedApplicants(Long jobId) {
+        Job job=jobRepo.findById(jobId).get();
+
+        List<JobSkills> jobSkillsList = job.getJobSkillsList();
+        Collection<UserSkills> usersSet=new HashSet<>();
+
+        jobSkillsList.forEach(jobSkills ->{
+            usersSet.addAll(userSkillsRepo.findBySkills(jobSkills.getJobSkill()));
+        } );
+        Collection<String> usersCollection=new HashSet<>();
+        usersSet.forEach(userSkills ->{
+            if(userSkills.getUser().isEnableNotification())usersCollection.add(userSkills.getUser().getEmail());
+        } );
+
+        return usersCollection;
+    }
 }
