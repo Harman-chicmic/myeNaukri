@@ -4,6 +4,7 @@ import com.chicmic.eNaukri.model.Job;
 import com.chicmic.eNaukri.service.JobService;
 import com.chicmic.eNaukri.service.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -32,8 +33,13 @@ public class UserController {
     public void myApplications(@PathVariable Long id){
 
     }
-    @PostMapping("{id}/myapplications/withdraw")
-    public void withdrawApxn(@PathVariable Long id,@RequestParam String job){
+    @PostMapping("{id}/job/{jobId}/withdraw")
+    public ResponseEntity<?> withdrawApxn(@PathVariable("id") Long id,@PathVariable("jobId") Long jobId){
+        if(userService.checkJobForuser(id,jobId)){
+            userService.withdrawApxn(id,jobId);
+            return ResponseEntity.ok().body("Withdrawn");
+        }
+        return ResponseEntity.badRequest().body("The job you are withdrawing doesn't exists for user !");
     }
     @GetMapping("{id}/checkCompany")
     public String returnCurrentCompany(@PathVariable Long id){

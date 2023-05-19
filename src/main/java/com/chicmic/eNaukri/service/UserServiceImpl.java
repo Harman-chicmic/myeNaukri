@@ -96,4 +96,19 @@ public class UserServiceImpl implements UserDetailsService {
         temp.setEnableNotification(b);
         usersRepo.save(temp);
     }
+
+    public boolean checkJobForuser(Long id, Long jobId) {
+        Users temp=usersRepo.findById(id).get();
+        Job job=jobRepo.findById(jobId).get();
+        return applicationRepo.existsByApplicantIdAndJobId(temp,job);
+    }
+
+    public void withdrawApxn(Long id, Long jobId) {
+        Users temp=usersRepo.findById(id).get();
+        Job job=jobRepo.findById(jobId).get();
+
+        Application application= applicationRepo.findByApplicantIdAndJobId(temp,job);
+        application.setWithdraw(true);
+        applicationRepo.save(application);
+    }
 }
