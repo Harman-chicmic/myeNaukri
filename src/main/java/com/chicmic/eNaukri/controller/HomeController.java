@@ -2,6 +2,7 @@ package com.chicmic.eNaukri.controller;
 
 import com.chicmic.eNaukri.model.Job;
 import com.chicmic.eNaukri.repo.UsersRepo;
+import com.chicmic.eNaukri.service.JobService;
 import com.chicmic.eNaukri.service.UserServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,6 +20,8 @@ public class HomeController {
 
     private final UsersRepo usersRepo;
     private final UserServiceImpl userService;
+    private final JobService jobService;
+
     @GetMapping
     public String homePage(){
         System.out.println("1");
@@ -58,6 +61,6 @@ public class HomeController {
                                  @RequestParam(required = false,name = "type") String jobType,
                                  @RequestParam(required = false,name = "postedOn") String postedOn,
                                  @RequestParam(required = false,name = "remoteHybridOnsite") String remoteHybridOnsite){
-        return userService.displayFilteredPaginatedJobs(query,location,jobType,postedOn,remoteHybridOnsite);
+        return jobService.displayFilteredPaginatedJobs(query,location,jobType,postedOn,remoteHybridOnsite);
     }
 }

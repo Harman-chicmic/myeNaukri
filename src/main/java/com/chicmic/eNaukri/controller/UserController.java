@@ -1,6 +1,7 @@
 package com.chicmic.eNaukri.controller;
 
 import com.chicmic.eNaukri.model.Job;
+import com.chicmic.eNaukri.service.JobService;
 import com.chicmic.eNaukri.service.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +14,7 @@ import java.util.Map;
 public class UserController {
 
     private final UserServiceImpl userService;
+    private final JobService jobService;
 
     @GetMapping("{id}")
     public void getUser(@PathVariable Long id){
@@ -40,7 +42,7 @@ public class UserController {
 
     @PostMapping("{id}/post")
     public String postJob(@RequestBody Job job,@RequestParam("company")String postedFor){
-        userService.saveJob(job,postedFor);
+        jobService.saveJob(job,postedFor);
         return "Wooho, Job posted !";
     }
 }
