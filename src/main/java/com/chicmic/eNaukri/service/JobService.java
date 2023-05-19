@@ -1,5 +1,6 @@
 package com.chicmic.eNaukri.service;
 
+import com.chicmic.eNaukri.model.Company;
 import com.chicmic.eNaukri.model.Job;
 import com.chicmic.eNaukri.repo.CompanyRepo;
 import com.chicmic.eNaukri.repo.JobRepo;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.util.StringUtils;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -76,4 +78,5 @@ public class JobService {
         return jobTypedQuery.getResultList();
 
     }
+
 }

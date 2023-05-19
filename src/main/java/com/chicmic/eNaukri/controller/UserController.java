@@ -45,4 +45,14 @@ public class UserController {
         jobService.saveJob(job,postedFor);
         return "Wooho, Job posted !";
     }
+    @GetMapping("{id}/unsubscribe")
+    public String unsubscribe(@PathVariable("id") Long id){
+        userService.changeAlerts(id,false);
+        return "Unsubscribed !";
+    }
+    @GetMapping("{id}/subscribe")
+    public String subscribe(@PathVariable("id") Long id){
+        userService.changeAlerts(id,true);
+        return "Subscribed !";
+    }
 }

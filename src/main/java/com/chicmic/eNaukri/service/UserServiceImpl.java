@@ -91,4 +91,9 @@ public class UserServiceImpl implements UserDetailsService {
     }
 
 
+    public void changeAlerts(Long id, boolean b) {
+        Users temp=usersRepo.findById(id).get();
+        temp.setEnableNotification(b);
+        usersRepo.save(temp);
+    }
 }
