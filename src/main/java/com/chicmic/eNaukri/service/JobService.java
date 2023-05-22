@@ -102,20 +102,6 @@ public class JobService {
         }
     }
     public void getUsersWithMatchingSkills(Long jobId) {
-//        Job temp=new Job();
-//        List<JobSkills> jobSkillsList=new ArrayList<>();
-//        Skills skills=skillsRepo.findById(1l).get();
-//        temp.setJobSkillsList(jobSkillsList);
-//        Job job=new Job();
-//        JobSkills jobSkills=new JobSkills();
-//        jobSkills.setJob(job);
-//        jobSkills.setJobSkill(skills);
-//        jobSkillsList.add(jobSkills);
-//        job.setJobSkillsList(jobSkillsList);
-//        jobRepo.save(job);
-//
-//
-//        jobSkillsRepo.save(jobSkills);
 
         Job job=jobRepo.findById(1l).get();
         List<JobSkills> requiredSkills=job.getJobSkillsList();

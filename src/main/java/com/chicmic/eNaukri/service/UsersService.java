@@ -72,7 +72,7 @@ import java.util.Random;
         // Check if OTP is correct
         if (user.getOtp().equals(otp)) {
             // Update user's OTP status to verified
-            user.setOtpVerified(true);
+            user.setVerified(true);
             //userRepository.save(user);
             return true;
         } else {

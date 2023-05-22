@@ -1,5 +1,6 @@
 package com.chicmic.eNaukri.controller;
 
+import com.chicmic.eNaukri.Dto.UsersDto;
 import com.chicmic.eNaukri.model.Job;
 import com.chicmic.eNaukri.service.JobService;
 import com.chicmic.eNaukri.service.UserServiceImpl;
@@ -15,15 +16,10 @@ import com.chicmic.eNaukri.model.Application;
 import com.chicmic.eNaukri.model.Education;
 import com.chicmic.eNaukri.model.Users;
 import com.chicmic.eNaukri.service.*;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/user/")
@@ -32,6 +28,10 @@ public class UserController {
 
     private final UserServiceImpl userService;
     private final JobService jobService;
+    private final ApplicationService applicationService;
+    private final SkillsService skillsService;
+    private final ExperienceService experienceService;
+    private final EducationService educationService;
 
     @GetMapping("{id}")
     public void getUser(@PathVariable Long id){
@@ -42,20 +42,26 @@ public class UserController {
 
     }
     @PostMapping("{id}/update-profile")
-    public void updateUser(@RequestBody Users users){
-
+    public void updateProfile(UsersDto user, @RequestParam("resumeFile")MultipartFile resumeFile, @RequestParam("imgFile")MultipartFile imgFile) throws IOException {
+        userService.updateUser(user,imgFile,resumeFile);
     }
+    @GetMapping("{id}/checkCompany")
+    public String returnCurrentCompany(@PathVariable Long id){
+        return userService.findCurrentCompany(id);
+    }
+
     @PostMapping("{id}/addedu")
     public void addEducation(@RequestBody Education education){
 
     }
     @PostMapping("{id}/job/{jobId}/withdraw")
-    public ResponseEntity<?> withdrawApxn(@PathVariable("id") Long id,@PathVariable("jobId") Long jobId){
-        if(userService.checkJobForuser(id,jobId)){
-            userService.withdrawApxn(id,jobId);
+    public ResponseEntity<?> withdrawApxn(@PathVariable("id") Long id,@PathVariable("jobId") Long jobId) {
+        if (userService.checkJobForuser(id, jobId)) {
+            userService.withdrawApxn(id, jobId);
             return ResponseEntity.ok().body("Withdrawn");
         }
         return ResponseEntity.badRequest().body("The job you are withdrawing doesn't exists for user !");
+    }
     @PostMapping("{id}/addexp")
     public void addExperience(){
 
@@ -85,9 +91,10 @@ public class UserController {
     }
 
     @PostMapping("{id}/post")
-    public String postJob(@RequestBody Job job,@RequestParam("company")String postedFor){
-        jobService.saveJob(job,postedFor);
+    public String postJob(@RequestBody Job job,@RequestParam("company")String postedFor) {
+        jobService.saveJob(job, postedFor);
         return "Wooho, Job posted !";
+    }
     @PostMapping("/{userId}/experience")
     public ResponseEntity<String> selectExperience(
             @PathVariable Long userId,
@@ -112,4 +119,5 @@ public class UserController {
         userService.changeAlerts(id,true);
         return "Subscribed !";
     }
+
 }
