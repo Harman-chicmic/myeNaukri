@@ -1,31 +1,24 @@
 package com.chicmic.eNaukri.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
-import java.time.LocalDate;
-
 @Entity
 @Data
 @RequiredArgsConstructor
-public class Experience {
+public class UserEducation {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long expId;
-    private String role;
-    private String roleDesc;
-    private boolean currentlyWorking;
-    private LocalDate joinedOn;
-    private LocalDate endedOn;
+    private Long userEducationId;
 
     @ManyToOne
     @JsonIgnore
-    private Users expUser;
+    private Users user;
 
     @ManyToOne
     @JsonIgnore
-    private Company exCompany;
+    private Education education;
 }

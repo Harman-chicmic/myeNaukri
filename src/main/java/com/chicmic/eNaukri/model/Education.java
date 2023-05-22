@@ -12,11 +12,9 @@ import java.time.LocalDate;
 @Data
 @RequiredArgsConstructor
 public class Education {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long exId;
-
     private String universityName;
     private String majors;
     private LocalDate startFrom;
@@ -24,6 +22,7 @@ public class Education {
     private LocalDate endOn;
     @JsonFormat(pattern="yyyy/mm/dd")
     private boolean student;
+    private String degree;
 
     @ManyToOne
     @JsonIgnore

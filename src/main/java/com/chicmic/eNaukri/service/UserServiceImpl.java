@@ -15,7 +15,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -92,6 +91,16 @@ public class UserServiceImpl implements UserDetailsService {
        return experienceRepo.findByExpUserAndCurrentlyWorking(users,true).getExCompany().getCompanyName();
     }
 
+    public void saveJob(Job job, String postedFor) {
+        Job newJob=new Job();
+        newJob.setJobTitle(job.getJobTitle());
+        newJob.setJobDesc(job.getJobDesc());
+        newJob.setActive(true);
+        newJob.setPostedOn(LocalDate.now());
+        newJob.setExpiresAt(job.getExpiresAt());
+        newJob.setPostFor(companyRepo.findByCompanyName(postedFor.trim()));
+        jobRepo.save(newJob);
+    }
 
     public void changeAlerts(Long id, boolean b) {
         Users temp=usersRepo.findById(id).get();
@@ -113,4 +122,42 @@ public class UserServiceImpl implements UserDetailsService {
         application.setWithdraw(true);
         applicationRepo.save(application);
     }
+    //    public List<Job> displayFilteredPaginatedJobs(String query, String location, String jobType, String postedOn, String remoteHybridOnsite) {
+//
+//
+//        if(StringUtils.isEmpty(query)&&StringUtils.isEmpty(location)&&StringUtils.isEmpty(jobType)&&StringUtils.isEmpty(postedOn)&&StringUtils.isEmpty(remoteHybridOnsite)){
+//            return jobRepo.findAll();
+//        }
+//        if(StringUtils.isEmpty(location))location="";
+//        if(StringUtils.isEmpty(jobType))jobType="";
+//        if(StringUtils.isEmpty(remoteHybridOnsite))remoteHybridOnsite="";
+//
+//        LocalDate currentDate=LocalDate.now();
+//        LocalDate startDate=null;
+//        if(!StringUtils.isEmpty(postedOn)){
+//            switch (postedOn){
+//                case "24hours":
+//                    startDate=currentDate.minusDays(1);break;
+//                case "thisWeek":
+//                    startDate=currentDate.minusWeeks(1);break;
+//                case "thisMonth":
+//                    startDate=currentDate.minusMonths(1);break;
+//                default:startDate=null;break;
+//            }
+//        }
+//
+//        if(StringUtils.isEmpty(query)){
+//            if(startDate!=null){
+//                return jobRepo.findByLocationContainingIgnoreCaseAndJobTypeAndRemoteHybridOnsiteAndPostedOnAfterAndActive(location,jobType,remoteHybridOnsite,startDate,true);
+//            }
+//            else return jobRepo.findByLocationContainingIgnoreCaseAndJobTypeAndRemoteHybridOnsiteAndActive(location,jobType,remoteHybridOnsite,true);
+//        }
+//        else{
+//            if(startDate!=null){
+//                return jobRepo.findByLocationContainingIgnoreCaseAndJobTypeAndRemoteHybridOnsiteAndPostedOnAfterAndJobTitleContainingIgnoreCaseAndActive(location,jobType,remoteHybridOnsite,startDate,query,true);
+//            }
+//            else return jobRepo.findByLocationContainingIgnoreCaseAndJobTypeAndRemoteHybridOnsiteAndJobTitleContainingIgnoreCaseAndActive(location,jobType,remoteHybridOnsite,query,true);
+//
+//        }
+//    }
 }

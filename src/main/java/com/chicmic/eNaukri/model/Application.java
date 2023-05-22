@@ -18,6 +18,11 @@ public class Application {
     private boolean priority;
     private boolean favourite;
     private boolean withdraw;
+    private int noticePeriod;
+    private String fullName;
+    private String email;
+    private String phoneNumber;
+
     @ManyToOne
     @JsonIgnore
     private Users applicantId;
