@@ -22,8 +22,4 @@ public class WebControllers {
         jobService.getUsersWithMatchingSkills(jobId);
         return ResponseEntity.ok("k");
     }
-    @GetMapping("{id}/update-profile")
-    public void updatePage(){
-
-    }
 }

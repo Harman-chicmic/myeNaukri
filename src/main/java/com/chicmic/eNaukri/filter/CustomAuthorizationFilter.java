@@ -21,7 +21,7 @@ import java.util.Collection;
 public class CustomAuthorizationFilter extends OncePerRequestFilter {
 
     private UserServiceImpl userService;
-    
+
     public  CustomAuthorizationFilter(UserServiceImpl userService){
         this.userService=userService;
     }
@@ -64,7 +64,7 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
 
                 Users temp= userService.findUserFromUUID(token.toLowerCase());
                 Collection<Authority> authorities=new ArrayList<>();
-                 authorities.add(new Authority("USER"));
+                authorities.add(new Authority("USER"));
 
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken=
                         new UsernamePasswordAuthenticationToken(temp,null,authorities);

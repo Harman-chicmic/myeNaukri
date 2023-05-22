@@ -14,7 +14,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -40,23 +39,23 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
 
-    //Filter objects
+        //Filter objects
         CustomAuthenticationFilter authenticationFilter=
                 new CustomAuthenticationFilter(userService,authenticationManager(http.getSharedObject(AuthenticationConfiguration.class)));
         authenticationFilter.setFilterProcessesUrl("/login");
 
-    //csrf+session
+        //csrf+session
         http.csrf().disable();
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-    //permits
+        //permits
         http.authorizeHttpRequests().requestMatchers("/user/**").hasAnyAuthority("USER");
         http.authorizeHttpRequests().anyRequest().permitAll();
 
-    //adding filters
+        //adding filters
         http.addFilterBefore(new CustomAuthorizationFilter(userService), UsernamePasswordAuthenticationFilter.class);
         http.addFilter(authenticationFilter);
 
-    //building
+        //building
         return http.build();
     }
 

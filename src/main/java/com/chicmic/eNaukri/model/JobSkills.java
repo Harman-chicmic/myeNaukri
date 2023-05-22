@@ -13,11 +13,11 @@ public class JobSkills {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long jobSkillId;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnore
     private Job job;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnore
     private Skills jobSkill;
 }

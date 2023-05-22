@@ -44,6 +44,4 @@ public class Job {
     @JsonIgnore
     private Company postFor;
 
-
-
 }

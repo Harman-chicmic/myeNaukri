@@ -12,10 +12,11 @@ import java.util.Set;
 
 @Data
 @Entity
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Users {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
@@ -30,11 +31,11 @@ public class Users {
     private String bio;
     private String ppPath;
     private String otp;
-    private boolean enableNotification;
     @UuidGenerator
     private String uuid;
     private String link;
-    boolean otpVerified;
+    private boolean isVerified;
+    private boolean enableNotification;
 
 //mappings
 
@@ -55,7 +56,7 @@ public class Users {
     @JsonIgnore
     private Set<UserToken> userTokenSet=new HashSet<>();
 
-    @OneToMany(mappedBy = "expUser", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "expUser",orphanRemoval = true, cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     private List<Experience> experienceList=new ArrayList<>();
 
 

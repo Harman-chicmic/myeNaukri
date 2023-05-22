@@ -6,8 +6,7 @@ import com.chicmic.eNaukri.model.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Collection;
-import java.util.Set;
 
 public interface UserSkillsRepo extends JpaRepository<UserSkills,Long> {
-    Set<UserSkills> findBySkills(Skills skills);
+    Collection<UserSkills> findBySkills(Skills jobSkill);
 }

@@ -3,26 +3,18 @@ package com.chicmic.eNaukri.controller;
 import com.chicmic.eNaukri.Dto.UserEducationDto;
 import com.chicmic.eNaukri.Dto.UserExperienceDto;
 import com.chicmic.eNaukri.Dto.UserSkillDto;
-import com.chicmic.eNaukri.Dto.UsersDto;
 import com.chicmic.eNaukri.model.Application;
 import com.chicmic.eNaukri.model.Education;
-import com.chicmic.eNaukri.model.PasswordResetToken;
 import com.chicmic.eNaukri.model.Users;
 import com.chicmic.eNaukri.service.*;
-import jakarta.mail.MessagingException;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.time.LocalDateTime;
 import java.util.Map;
 
 @RestController
@@ -41,24 +33,17 @@ public class UserController {
     public void getUser(){
 
     }
+    @GetMapping("{id}/update-profile")
+    public void updatePage(){
 
-    @PostMapping("/signup")
-    @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<String> register(UsersDto dto, @RequestParam("imgFile") MultipartFile imgFile,
-                                           @RequestParam("resumeFile") MultipartFile resumeFile) throws IOException {
-        usersService.register(dto,imgFile,resumeFile);
-        return ResponseEntity.ok("User Registered");
     }
-    @PutMapping("/updateProfile")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public void updateProfile(UsersDto user, @RequestParam("resumeFile")MultipartFile resumeFile, @RequestParam("imgFile")MultipartFile imgFile) throws IOException {
-        usersService.updateUser(user,imgFile,resumeFile);
+    @PostMapping("{id}/update-profile")
+    public void updateUser(@RequestBody Users users){
+
     }
-    @PostMapping("/set-new-password")
-    public void setPassword(HttpServletRequest request) throws MessagingException, UnsupportedEncodingException {
-        String email = request.getParameter("email");
-        Users user = usersService.getUserByEmail(email);
-        passwordResetService.createPasswordResetTokenForUser(user);
+    @PostMapping("{id}/addedu")
+    public void addEducation(@RequestBody Education education){
+
     }
     @GetMapping("/enterNewPassword/{token}/{uuid}")
     public String Enter(HttpServletRequest request, @PathVariable("token") String token, @PathVariable("uuid") String uuid) {
@@ -118,4 +103,15 @@ public class UserController {
         applicationService.applyForJob(application,resumeFile,userId,jobId);
         return ResponseEntity.ok("Successfully applied to the user");
     }
+    @GetMapping("{id}/unsubscribe")
+    public String unsubscribe(@PathVariable("id") Long id){
+        userService.changeAlerts(id,false);
+        return "Unsubscribed !";
+    }
+    @GetMapping("{id}/subscribe")
+    public String subscribe(@PathVariable("id") Long id){
+        userService.changeAlerts(id,true);
+        return "Subscribed !";
+    }
+
 }

@@ -1,32 +1,38 @@
 package com.chicmic.eNaukri.service;
 
+import com.chicmic.eNaukri.Dto.UsersDto;
+import com.chicmic.eNaukri.controller.UserController;
 import com.chicmic.eNaukri.model.*;
 import com.chicmic.eNaukri.repo.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Root;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
+
+import static com.chicmic.eNaukri.ENaukriApplication.passwordEncoder;
 
 @Service
 @Slf4j
@@ -41,8 +47,17 @@ public class UserServiceImpl implements UserDetailsService {
     private final SkillsRepo skillsRepo;
     private final CompanyRepo companyRepo;
     private final UserTokenRepo tokenRepo;
+    private final JobSkillsRepo jobSkillsRepo;
     @PersistenceContext
     private EntityManager entityManager;
+    @Autowired
+    JavaMailSender javaMailSender;
+
+    private Logger logger= LoggerFactory.getLogger(UserController.class);
+    public static final String imagePath= "/home/chicmic/Downloads/JobPortal/src/main/resources/static/assets/img/";
+    public static final String resumePath = "/home/chicmic/Downloads/JobPortal/src/main/resources/static/assets/files/";
+
+
 
     public void saveUUID(UserToken userToken) {
         tokenRepo.save(userToken);
@@ -90,70 +105,133 @@ public class UserServiceImpl implements UserDetailsService {
        return experienceRepo.findByExpUserAndCurrentlyWorking(users,true).getExCompany().getCompanyName();
     }
 
+    public void changeAlerts(Long id, boolean b) {
+        Users temp=usersRepo.findById(id).get();
+        temp.setEnableNotification(b);
+        usersRepo.save(temp);
+    }
 
+    public boolean checkJobForuser(Long id, Long jobId) {
+        Users temp=usersRepo.findById(id).get();
+        Job job=jobRepo.findById(jobId).get();
+        return applicationRepo.existsByApplicantIdAndJobId(temp,job);
+    }
 
+    public void withdrawApxn(Long id, Long jobId) {
+        Users temp=usersRepo.findById(id).get();
+        Job job=jobRepo.findById(jobId).get();
 
+        Application application= applicationRepo.findByApplicantIdAndJobId(temp,job);
+        application.setWithdraw(true);
+        applicationRepo.save(application);
+    }
+    public Users getUserByUuid(String uuid) { return usersRepo.findByUuid(uuid); }
 
-    public List<Job> displayFilteredPaginatedJobs(String query, String location, String jobType, String postedOn, String remoteHybridOnsite) {
-        boolean flag=true;
-        CriteriaBuilder cb=entityManager.getCriteriaBuilder();
-        CriteriaQuery<Job> criteriaQuery= cb.createQuery(Job.class);
+    @Async
+    public void register(Users user) {
+        // Generate OTP
+        String otp =Integer.toString(new Random().nextInt(999999));
+        System.out.println(otp);
 
-        Root<Job> root=criteriaQuery.from(Job.class);
-
-            if(!StringUtils.isEmpty(query)){
-                criteriaQuery.where(cb.and( cb.like(root.get("jobTitle"),"%" +query+ "%"),cb.isTrue(root.get("active"))));
-                criteriaQuery.where(cb.and( cb.like(root.get("jobDesc"),"%" +query+ "%"),cb.isTrue(root.get("active"))));
-            }
-            if(!StringUtils.isEmpty(location))criteriaQuery.where(cb.and( cb.like(root.get("location"),location),cb.isTrue(root.get("active"))));
-            if(!StringUtils.isEmpty(postedOn))criteriaQuery.where(cb.and( cb.like(root.get("postedOn"),postedOn),cb.isTrue(root.get("active"))));
-            if(!StringUtils.isEmpty(jobType))criteriaQuery.where(cb.and( cb.like(root.get("jobType"),jobType),cb.isTrue(root.get("active"))));
-            if(!StringUtils.isEmpty(remoteHybridOnsite))criteriaQuery.where(cb.and( cb.like(root.get("remoteHybridOnsite"),remoteHybridOnsite),cb.isTrue(root.get("active"))));
-
-    //pagination
-        TypedQuery<Job> typedQuery=entityManager.createQuery(criteriaQuery.where(cb.isTrue(root.get("active"))));
-        typedQuery.setFirstResult(0);
-        typedQuery.setMaxResults(5);
-
-        return typedQuery.getResultList();
+        // Send OTP to user's email
+        String subject = "OTP for user registration";
+        String message = "Your OTP is: " + otp;
+        user.setOtp(otp);
+        usersRepo.save(user);
+        sendEmail(user.getEmail(), subject, message);
 
     }
-    //    public List<Job> displayFilteredPaginatedJobs(String query, String location, String jobType, String postedOn, String remoteHybridOnsite) {
-//
-//
-//        if(StringUtils.isEmpty(query)&&StringUtils.isEmpty(location)&&StringUtils.isEmpty(jobType)&&StringUtils.isEmpty(postedOn)&&StringUtils.isEmpty(remoteHybridOnsite)){
-//            return jobRepo.findAll();
-//        }
-//        if(StringUtils.isEmpty(location))location="";
-//        if(StringUtils.isEmpty(jobType))jobType="";
-//        if(StringUtils.isEmpty(remoteHybridOnsite))remoteHybridOnsite="";
-//
-//        LocalDate currentDate=LocalDate.now();
-//        LocalDate startDate=null;
-//        if(!StringUtils.isEmpty(postedOn)){
-//            switch (postedOn){
-//                case "24hours":
-//                    startDate=currentDate.minusDays(1);break;
-//                case "thisWeek":
-//                    startDate=currentDate.minusWeeks(1);break;
-//                case "thisMonth":
-//                    startDate=currentDate.minusMonths(1);break;
-//                default:startDate=null;break;
-//            }
-//        }
-//
-//        if(StringUtils.isEmpty(query)){
-//            if(startDate!=null){
-//                return jobRepo.findByLocationContainingIgnoreCaseAndJobTypeAndRemoteHybridOnsiteAndPostedOnAfterAndActive(location,jobType,remoteHybridOnsite,startDate,true);
-//            }
-//            else return jobRepo.findByLocationContainingIgnoreCaseAndJobTypeAndRemoteHybridOnsiteAndActive(location,jobType,remoteHybridOnsite,true);
-//        }
-//        else{
-//            if(startDate!=null){
-//                return jobRepo.findByLocationContainingIgnoreCaseAndJobTypeAndRemoteHybridOnsiteAndPostedOnAfterAndJobTitleContainingIgnoreCaseAndActive(location,jobType,remoteHybridOnsite,startDate,query,true);
-//            }
-//            else return jobRepo.findByLocationContainingIgnoreCaseAndJobTypeAndRemoteHybridOnsiteAndJobTitleContainingIgnoreCaseAndActive(location,jobType,remoteHybridOnsite,query,true);
-//
-//        }
-//    }
+    private void sendEmail(String to, String subject, String body) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("harmanjyot.singh@chicmic.co.in");
+        message.setTo(to);
+        message.setSubject(subject);
+        message.setText(body);
+        javaMailSender.send(message);
+    }
+    public boolean verify(String email, String otp) {
+        // Get user by email
+        Users user = usersRepo.findByEmail(email);
+        if (user == null) {
+            return false;
+        }
+
+        // Check if OTP is correct
+        if (user.getOtp().equals(otp)) {
+            // Update user's OTP status to verified
+            user.setVerified(true);
+            //userRepository.save(user);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public void updateUser(UsersDto user, MultipartFile imgFile, MultipartFile resumeFile) throws IOException {
+        Users existingUser=usersRepo.findByEmail(user.getEmail());
+        if(user.getFullName()!=null){
+            existingUser.setFullName(user.getFullName());
+        }
+        if(user.getPhoneNumber()!=null){
+            existingUser.setPhoneNumber(user.getPhoneNumber());
+        }
+        if (user.getCurrentCompany()!=null){
+            existingUser.setCurrentCompany(user.getCurrentCompany());
+        }
+        if(user.getBio()!=null){
+            existingUser.setBio(user.getBio());
+        }
+        if(!imgFile.isEmpty()){
+            String imgFolder = imagePath;
+            System.out.println(imagePath);
+            byte[] imgFileBytes = imgFile.getBytes();
+            Path imgPath = Paths.get(imgFolder +  imgFile.getOriginalFilename());
+            Files.write(imgPath, imgFileBytes);
+            String ppPath="/static/assets/img" +imgFile.getOriginalFilename();
+            existingUser.setPpPath(ppPath);
+        }
+        if(!resumeFile.isEmpty()){
+            String resumeFolder=resumePath;
+            byte[] resumeFileBytes= resumeFile.getBytes();
+            Path resumePath=Paths.get(resumeFolder+resumeFile.getOriginalFilename());
+            Files.write(resumePath,resumeFileBytes);
+            String cvPath="/static/assets/files" +resumeFile.getOriginalFilename();
+            existingUser.setCvPath(cvPath);
+        }
+        usersRepo.save(existingUser);
+    }
+
+    public void saveUser(UsersDto dto, MultipartFile imgFile, MultipartFile resumeFile) throws IOException {
+        String userToken=UUID.randomUUID().toString();
+        String fullName=dto.getFullName();
+        String email= dto.getEmail();
+        String phone=dto.getPhoneNumber();
+        String password=dto.getPassword();
+        String bio=dto.getBio();
+        String imgFolder = imagePath;
+        String resumeFolder=resumePath;
+        System.out.println(imagePath);
+        Users user=Users.builder()
+                .fullName(fullName)
+                .email(email)
+                .phoneNumber(phone)
+                .password(passwordEncoder().encode(password))
+                .uuid(userToken)
+                .bio(bio)
+                .enableNotification(true)
+                .build();
+        if(!imgFile.isEmpty()&&!resumeFile.isEmpty()){
+            byte[] imgFileBytes = imgFile.getBytes();
+            byte[] resumeFileBytes= resumeFile.getBytes();
+            Path imgPath = Paths.get(imgFolder +  imgFile.getOriginalFilename());
+            Path resumePath=Paths.get(resumeFolder+resumeFile.getOriginalFilename());
+            logger.info(imgPath.toString()+resumePath.toString());
+            Files.write(imgPath, imgFileBytes);
+            Files.write(resumePath,resumeFileBytes);
+            user=Users.builder()
+                    .ppPath("/static/assets/img" +imgFile.getOriginalFilename())
+                    .cvPath("/static/assets/files" +resumeFile.getOriginalFilename()).build();
+        }
+       register(user);
+    }
 }
