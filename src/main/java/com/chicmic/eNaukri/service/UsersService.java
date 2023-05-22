@@ -1,12 +1,17 @@
 package com.chicmic.eNaukri.service;
 
 import com.chicmic.eNaukri.Dto.UsersDto;
+import com.chicmic.eNaukri.model.Education;
 import com.chicmic.eNaukri.model.Users;
 import com.chicmic.eNaukri.repo.UsersRepo;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -15,43 +20,60 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Random;
+import java.util.UUID;
 
 @Service public class UsersService {
-    public static final String imagePath= "/home/chicmic/Downloads/JobPortal/src/main/resources/static/assets/img/";
-    public static final String resumePath = "/home/chicmic/Downloads/JobPortal/src/main/resources/static/assets/files/";
+    @Value("${my.imagePath.string}")
+    String imagePath;
+    @Value("${my.cvPath.string}")
+    String resumePath;
     @Autowired
     UsersRepo usersRepo;
     @Autowired
     JavaMailSender javaMailSender;
+    @Autowired
+    BCryptPasswordEncoder passwordEncoder;
     public Users getUserByEmail(String email) {
         return usersRepo.findByEmail(email);
     }
     public Users getUserByUuid(String uuid) { return usersRepo.findByUuid(uuid); }
-
     public void saveUser(Users user) {
         usersRepo.save(user);
     }
 
-    public Users getUser(String email) {
-        return usersRepo.findByEmail(email);
-    }
     @Async
-    public void register(Users user) {
+    public void register(UsersDto dto, MultipartFile imgFile,MultipartFile resumeFile) throws IOException {
+        String uuid= UUID.randomUUID().toString();
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        Users newUser = mapper.convertValue(dto, Users.class);
+        if(!imgFile.isEmpty()){
+            String imgFolder = imagePath;
+            System.out.println(imagePath);
+            byte[] imgFileBytes = imgFile.getBytes();
+            Path imgPath = Paths.get(imgFolder +  imgFile.getOriginalFilename());
+            Files.write(imgPath, imgFileBytes);
+            String ppPath="/static/assets/img" +imgFile.getOriginalFilename();
+            newUser.setPpPath(ppPath);
+        }
+        if(!resumeFile.isEmpty()){
+            String resumeFolder=resumePath;
+            byte[] resumeFileBytes= resumeFile.getBytes();
+            Path resumePath=Paths.get(resumeFolder+resumeFile.getOriginalFilename());
+            Files.write(resumePath,resumeFileBytes);
+            String cvPath="/static/assets/files" +resumeFile.getOriginalFilename();
+            newUser.setCvPath(cvPath);
+        }
+        newUser.setPassword(passwordEncoder.encode(dto.getPassword()));
+        newUser.setUuid(uuid);
         // Generate OTP
         String otp =Integer.toString(new Random().nextInt(999999));
-        System.out.println(otp);
-
         // Send OTP to user's email
         String subject = "OTP for user registration";
         String message = "Your OTP is: " + otp;
-        user.setOtp(otp);
-        usersRepo.save(user);
-        sendEmailForOtp(user.getEmail(), subject, message);
-
-        // Save user to database
-        // ...
-
-//        return user;
+        newUser.setOtp(otp);
+        usersRepo.save(newUser);
+        sendEmailForOtp(newUser.getEmail(), subject, message);
     }
 
     private void sendEmailForOtp(String to, String subject, String body) {

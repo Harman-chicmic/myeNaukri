@@ -10,6 +10,7 @@ import com.chicmic.eNaukri.repo.UsersRepo;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,7 +21,8 @@ import java.nio.file.Paths;
 import java.util.List;
 
 @Service public class ApplicationService {
-    public static final String resumePath = "/home/chicmic/Downloads/JobPortal/src/main/resources/static/assets/files/";
+    @Value("${my.cvPath.String}")
+    String resumePath;
     @Autowired
     ApplicationRepo applicationRepo;
     @Autowired
