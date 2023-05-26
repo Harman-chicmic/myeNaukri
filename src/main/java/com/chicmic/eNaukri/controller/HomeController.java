@@ -8,6 +8,7 @@ import com.chicmic.eNaukri.repo.UsersRepo;
 import com.chicmic.eNaukri.service.JobService;
 import com.chicmic.eNaukri.service.PasswordResetService;
 import com.chicmic.eNaukri.service.UserServiceImpl;
+import com.chicmic.eNaukri.service.UsersService;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -34,6 +35,7 @@ import static com.chicmic.eNaukri.ENaukriApplication.passwordEncoder;
 public class HomeController {
 
     private final UsersRepo usersRepo;
+    private final UsersService usersService;
     private final UserServiceImpl userService;
     private final JobService jobService;
     private final PasswordResetService passwordResetService;
@@ -51,16 +53,16 @@ public class HomeController {
     public String userLogin(@RequestBody Map<Object,Object> map){
         return "login successful";
     }
-    @GetMapping("signup")
-    public String signupPage(){
-        return "In signup Page";
-    }
-    @PostMapping("signup")
+    @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
-    public String register(UsersDto dto, @RequestParam("imgUrl") MultipartFile imgFile,
-                           @RequestParam("resumeUrl") MultipartFile resumeFile) throws IOException {
-        userService.saveUser(dto,imgFile,resumeFile);
-        return "User Saved !";
+    public ResponseEntity<String> register(Users dto, @RequestParam(required = false,value = "imgFile") MultipartFile imgFile,
+                                           @RequestParam(value = "resumeFile",required = false) MultipartFile resumeFile) throws IOException {
+        usersService.register(dto, imgFile, resumeFile);
+        return ResponseEntity.ok("User registered successfully");
+    }
+    @PostMapping("/updateProfile")
+    public void updateProfile(UsersDto user, @RequestParam(value="resumeFile",required = false)MultipartFile resumeFile, @RequestParam(value="imgFile",required = false)MultipartFile imgFile) throws IOException {
+        usersService.updateUser(user,imgFile,resumeFile);
     }
     @GetMapping("logout-user")
     public String logout(HttpServletRequest request, HttpServletResponse response){
@@ -75,6 +77,7 @@ public class HomeController {
     public boolean sendForgotPaswdLink(@RequestParam String email){
         return true;
     }
+
     @GetMapping("jobs")
     public List<Job> displayJobs(@RequestParam(required = false,name = "q") String query,
                                  @RequestParam(required = false,name = "location") String location,
@@ -93,15 +96,12 @@ public class HomeController {
     public void setPassword(HttpServletRequest request) throws MessagingException, UnsupportedEncodingException {
         String email = request.getParameter("email");
         Users user = userService.getUserByEmail(email);
-        //String resetPasswordLink="http://localhost:8081/reset-email";
         passwordResetService.createPasswordResetTokenForUser(user);
     }
     @GetMapping("/enterNewPassword/{token}/{uuid}")
     public String Enter(HttpServletRequest
                                 request, @PathVariable("token") String token, @PathVariable("uuid") String uuid, Model model) {
-        //String newPassword=request.getParameter("password");
         PasswordResetToken passwordResetRequest = passwordResetService.findByToken(token);
-//        User user= passwordResetRequest.getUser();
         if (passwordResetRequest == null || passwordResetRequest.getExpiryDate().isBefore(LocalDateTime.now())) {
             return "redirect:/login?error=InvalidToken";
         }
@@ -119,10 +119,8 @@ public class HomeController {
             return "redirect:/login?error=InvalidToken";
         }
         user.setPassword(passwordEncoder().encode(newPassword));
-//        user.setPassword(newPassword);
         usersRepo.save(user);
         passwordResetService.delete(passwordResetRequest);
-        //return "redirect:/login?success=PasswordReset";
         return "user-login";
     }
     @PostMapping("/new")

@@ -3,11 +3,18 @@ package com.chicmic.eNaukri.Dto;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.UuidGenerator;
 import org.springframework.web.multipart.MultipartFile;
 
-@Data public class UsersDto {
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor public class UsersDto {
 
     private String fullName;
     private String email;

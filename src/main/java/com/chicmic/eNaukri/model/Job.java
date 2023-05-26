@@ -32,6 +32,7 @@ public class Job {
     private LocalDate updatedOn;
     private LocalDate expiresAt;
     private boolean active;
+    private int numApplicants;
 
 //mappings
     @OneToMany(mappedBy = "jobId", cascade = CascadeType.ALL,fetch = FetchType.LAZY)

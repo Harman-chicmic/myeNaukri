@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -20,7 +21,8 @@ public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
-
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private String fullName;
     private String username;
     private String email;
@@ -39,14 +41,14 @@ public class Users {
 
 //mappings
 
-    @OneToOne(mappedBy = "userLinks", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "userLinks", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     @JsonIgnore
     private SocialLink socialLink;
 
     @OneToMany(mappedBy = "edUser", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Education> educationList=new ArrayList<>();
 
-    @OneToMany(mappedBy = "applicantId", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "applicantId", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     private List<Application> applicationList=new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,fetch =FetchType.EAGER)

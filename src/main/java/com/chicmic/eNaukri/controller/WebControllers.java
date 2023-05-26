@@ -16,10 +16,14 @@ public class WebControllers {
     JobService jobService;
     @GetMapping("/signup")
     public String signup(){return "signup";}
-    @PostMapping("/new")
-    @ResponseBody
-    public ResponseEntity<String> nwe(@Param("jobId") Long jobId){
-        jobService.getUsersWithMatchingSkills(jobId);
-        return ResponseEntity.ok("k");
+    @GetMapping("{id}/update-profile")
+    public void updatePage(){
+
     }
+//    @PostMapping("/new")
+//    @ResponseBody
+//    public ResponseEntity<String> nwe(@Param("jobId") Long jobId){
+//        jobService.getUsersWithMatchingSkills(jobId);
+//        return ResponseEntity.ok("k");
+//    }
 }

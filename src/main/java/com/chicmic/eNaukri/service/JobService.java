@@ -11,6 +11,8 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.util.StringUtils;
 
@@ -28,23 +30,29 @@ public class JobService {
     private final UserSkillsRepo userSkillsRepo;
     @PersistenceContext
     private EntityManager entityManager;
-    public void saveJob(Job job, String postedFor) {
+    UsersService usersService;
+    @Async public void saveJob(Job job, Long companyId,Long userId) {
+        String postedFor=companyRepo.findById(companyId).get().getCompanyName();
+        Users user=usersRepo.findById(userId).get();
         Job newJob=new Job();
         newJob.setJobTitle(job.getJobTitle());
         newJob.setJobDesc(job.getJobDesc());
         newJob.setActive(true);
         newJob.setPostedOn(LocalDate.now());
         newJob.setExpiresAt(job.getExpiresAt());
-        newJob.setPostFor(companyRepo.findByCompanyName(postedFor.trim()));
+        if(user.getCurrentCompany()==postedFor){
+            newJob.setPostFor(companyRepo.findByCompanyName(postedFor.trim()));
+        }
+//        else if(user.getCurrentCompany()==null){
+//            newJob.setPostFor(user.getFullName());
+//        }
         jobRepo.save(newJob);
+        List<Users> usersList=getUsersWithMatchingSkills(job.getJobId());
+        sendEmailNotifications(usersList,job);
     }
-
-
     public List<Job> displayFilteredPaginatedJobs(String query, String location, String jobType, String postedOn, String remoteHybridOnsite) {
-
         CriteriaBuilder builder=entityManager.getCriteriaBuilder();
         CriteriaQuery<Job> criteriaQuery=builder.createQuery(Job.class);
-
         Root<Job> root=criteriaQuery.from(Job.class);
         Predicate queryInTitle=(!StringUtils.isEmpty(query))?builder.like(root.get("jobTitle"),"%"+ query +"%"):builder.like(root.get("jobTitle"),"%%");
         Predicate queryInDesc=(!StringUtils.isEmpty(query))?builder.like(root.get("jobDesc"),"%"+ query +"%"):builder.like(root.get("jobTitle"),"%%");
@@ -101,33 +109,34 @@ public class JobService {
             jobRepo.save(job1);
         }
     }
-    public void getUsersWithMatchingSkills(Long jobId) {
-
+    public List<Users> getUsersWithMatchingSkills(Long jobId) {
         Job job=jobRepo.findById(1l).get();
         List<JobSkills> requiredSkills=job.getJobSkillsList();
         Set<UserSkills> userSet=new HashSet<>();
         requiredSkills.forEach(jobSkillss ->{
                   userSet.addAll(userSkillsRepo.findBySkills(jobSkillss.getJobSkill()));
         });
-        Set<Users> usersSet=new HashSet<>();
+        List<Users> usersSet=new ArrayList<>();
         userSet.forEach(userSkills -> usersSet.add(userSkills.getUser()));
         System.out.println(usersSet);
+        return usersSet;
     }
-
     private void sendEmailNotifications(List<Users> users, Job job) {
         for (Users users1 : users) {
-            String emailContent = "Dear " + users1.getFullName() + ",\n"
-                    + "A new job matching your skills has been posted.\n"
-                    + "Job Title: " + job.getJobTitle() + "\n"
-                    + "Job Description: " + job.getJobDesc() + "\n"
-                    + "Please consider applying if you are interested.\n"
-                    + "Best regards,\n"
-                    + "Your Job Portal Team";
-            // Send email to the user
-            // ...
+                String body = "Dear " + users1.getFullName() + ",\n"
+                        + "A new job matching your skills has been posted.\n"
+                        + "Job Title: " + job.getJobTitle() + "\n"
+                        + "Job Description: " + job.getJobDesc() + "\n"
+                        + "Please consider applying if you are interested.\n"
+                        + "Best regards,\n"
+                        + "Your Job Portal Team";
+                // Send email to the user
+                // ...
+                String to = users1.getEmail();
+                String subject = "Matching job";
+            if (users1.isEnableNotification()) {
+                usersService.sendEmailForOtp(to, subject, body);
+            }
         }
     }
-
-
-
 }

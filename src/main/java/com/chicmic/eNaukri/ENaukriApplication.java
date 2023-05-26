@@ -31,5 +31,4 @@ public class ENaukriApplication {
 		BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
 		return bCryptPasswordEncoder;
 	}
-
 }

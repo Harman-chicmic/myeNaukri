@@ -3,80 +3,56 @@ package com.chicmic.eNaukri.controller;
 import com.chicmic.eNaukri.Dto.UserEducationDto;
 import com.chicmic.eNaukri.Dto.UserExperienceDto;
 import com.chicmic.eNaukri.Dto.UserSkillDto;
-import com.chicmic.eNaukri.model.Application;
-import com.chicmic.eNaukri.model.Education;
-import com.chicmic.eNaukri.model.Users;
+import com.chicmic.eNaukri.Dto.UsersDto;
+import com.chicmic.eNaukri.model.*;
 import com.chicmic.eNaukri.service.*;
+import jakarta.mail.MessagingException;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/user/")
 @RequiredArgsConstructor
 public class UserController {
-    UsersService usersService;
+
+    @Autowired
     SkillsService skillsService;
     EducationService educationService;
-    ExperienceService experienceService;
+    @Autowired ExperienceService experienceService;
     ApplicationService applicationService;
-    PasswordResetService passwordResetService;
-    BCryptPasswordEncoder passwordEncoder;
+    UserServiceImpl userService;
+    @Autowired
+    UsersService usersService;
+    SocialLinkService linkService;
+    JobService jobService;
 
     @GetMapping("{id}")
     public void getUser(){
 
     }
-    @GetMapping("{id}/update-profile")
-    public void updatePage(){
-
-    }
     @PostMapping("{id}/update-profile")
-    public void updateUser(@RequestBody Users users){
-
-    }
-    @PostMapping("{id}/addedu")
-    public void addEducation(@RequestBody Education education){
-
-    }
-    @GetMapping("/enterNewPassword/{token}/{uuid}")
-    public String Enter(HttpServletRequest request, @PathVariable("token") String token, @PathVariable("uuid") String uuid) {
-        PasswordResetToken passwordResetRequest = passwordResetService.findByToken(token);
-        if (passwordResetRequest == null || passwordResetRequest.getExpiryDate().isBefore(LocalDateTime.now())) {
-            return "redirect:/login?error=InvalidToken";
-        }
-        return "forgotPasswordForm";
-    }
-    @PostMapping("/enterNewPassword/{token}/{uuid}")
-    public String resetPassword(HttpServletRequest request,@PathVariable("token") String token,@PathVariable("uuid") String uuid){
-        PasswordResetToken passwordResetRequest = passwordResetService.findByToken(token);
-        Users user = usersService.getUserByUuid(uuid);
-        String newPassword=request.getParameter("password");
-        if (passwordResetRequest == null || passwordResetRequest.getExpiryDate().isBefore(LocalDateTime.now())) {
-            return "redirect:/login?error=InvalidToken";
-        }
-        user.setPassword(passwordEncoder.encode(newPassword));
-        usersService.saveUser(user);
-        passwordResetService.delete(passwordResetRequest);
-        return "user-login";
+    public void updateProfile(UsersDto user, @RequestParam("resumeFile")MultipartFile resumeFile, @RequestParam("imgFile")MultipartFile imgFile) throws IOException {
+        usersService.updateUser(user,imgFile,resumeFile);
     }
     @GetMapping("{userId}/myapplications")
-    public ResponseEntity<String> myApplications(@PathVariable Long userId){
+    public ResponseEntity<String> myApplications(@PathVariable("userId") Long userId){
         applicationService.viewApplications(userId);
         return ResponseEntity.ok("list of your applications");
     }
-    @PostMapping("{id}/myapplications/withdraw")
-    public void withdrawApxn(@RequestParam String job){
-    }
-    @PutMapping("/{userId}/skills")
+    @PostMapping("/{userId}/skills")
     public ResponseEntity<String> selectUserSkills(
-            @PathVariable Long userId,
+            @PathVariable("userId") Long userId,
             @RequestBody UserSkillDto dto) {
         dto.setUserId(userId);
         skillsService.addSkills(dto);
@@ -84,24 +60,24 @@ public class UserController {
     }
     @PostMapping("/{userId}/education")
     public ResponseEntity<String> selectUserEducation(
-            @PathVariable Long userId,
+            @PathVariable("userId") Long userId,
             @RequestBody UserEducationDto dto) {
         educationService.addEducation(dto,userId);
         return ResponseEntity.ok("Educational qualification added to the user");
     }
     @PostMapping("/{userId}/experience")
     public ResponseEntity<String> selectExperience(
-            @PathVariable Long userId,
+            @PathVariable("userId") Long userId,
             @RequestBody UserExperienceDto dto) {
         experienceService.addExperience(userId,dto);
         return ResponseEntity.ok("Experience added to the user");
     }
     @PostMapping("/{userId}/{jobId}/apply")
     public ResponseEntity<String> apply(
-            @PathVariable Long userId, @PathVariable Long jobId,
-            MultipartFile resumeFile, @RequestBody Application application)throws IOException {
+            @PathVariable("userId") Long userId, @PathVariable() Long jobId,@RequestParam("resumeFile") MultipartFile resumeFile,
+            @RequestBody Application application)throws IOException,MessagingException {
         applicationService.applyForJob(application,resumeFile,userId,jobId);
-        return ResponseEntity.ok("Successfully applied to the user");
+        return ResponseEntity.ok("Successfully applied to the job");
     }
     @GetMapping("{id}/unsubscribe")
     public String unsubscribe(@PathVariable("id") Long id){
@@ -113,5 +89,35 @@ public class UserController {
         userService.changeAlerts(id,true);
         return "Subscribed !";
     }
-
+    @GetMapping("/{id}/currentCompany")
+    public String currentCompany(@PathVariable("id") Long id){
+        return userService.findCurrentCompany(id);
+    }
+    @GetMapping("/{userId}/{jobId}/checkApplication")
+    public String check(@PathVariable("userId") Long userId, @PathVariable("jobId") Long jobId){
+        userService.checkJobForUser(userId, jobId);
+        return "";
+    }
+    @GetMapping("/{userId}/{jobId}/withdraw")
+    public void withdraw(@PathVariable("userId") Long userId, @PathVariable("jobId") Long jobId){
+        userService.withdrawApxn(userId, jobId);
+    }
+    @GetMapping("/{jobId}/numApplicants")
+    public String numApplicants(@PathVariable Long jobId){
+        return String.valueOf(applicationService.getNumApplicantsForJob(jobId));
+    }
+    @PostMapping("{userid}/addSocialLinks")
+    public ResponseEntity<String> addSocialLinks(@PathVariable Long userId, SocialLink dto){
+        linkService.addSocialLinks(userId, dto,null);
+        return ResponseEntity.ok("Added social links");
+    }
+    @PostMapping("/{userId}/verify")
+    public ResponseEntity<String> verify(@PathVariable Long userId,@RequestParam String otp){
+        boolean isVerified = usersService.verify(userId, otp);
+        if (isVerified) {
+            return ResponseEntity.ok("User verification successful.");
+        } else {
+            return ResponseEntity.badRequest().body("Invalid OTP. User verification failed.");
+        }
+    }
 }
