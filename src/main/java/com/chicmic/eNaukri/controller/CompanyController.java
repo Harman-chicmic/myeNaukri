@@ -1,5 +1,6 @@
 package com.chicmic.eNaukri.controller;
 
+import com.chicmic.eNaukri.Dto.JobDto;
 import com.chicmic.eNaukri.model.Company;
 import com.chicmic.eNaukri.model.Job;
 import com.chicmic.eNaukri.model.SocialLink;
@@ -41,11 +42,11 @@ public class CompanyController {
         return (ResponseEntity<?>) ResponseEntity.badRequest().body("Job that you are looking for doesn't exists for this company !");
     }
     @PostMapping("{id}/postJob")
-    public ResponseEntity<String> postJob(Job job,@PathVariable Long id,Long userId){
-        jobService.saveJob(job,id,userId);
+    public ResponseEntity<String> postJob(@RequestBody JobDto job, @PathVariable Long id){
+        jobService.saveJob(job,id);
         return ResponseEntity.ok("Job successfully posted");
     }
-    @PutMapping("/{id}/setStatus")
+    @PutMapping("{id}/setStatus")
     public ResponseEntity<String> setStatus(@PathVariable Long id,boolean active){
         jobService.setStatus(id,active);
         return ResponseEntity.ok("Status changed");

@@ -48,7 +48,8 @@ public class SecurityConfig {
         http.csrf().disable();
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         //permits
-        http.authorizeHttpRequests().requestMatchers("/user/**").hasAnyAuthority("USER");
+//        http.authorizeHttpRequests().requestMatchers("/user/**").hasAnyAuthority("USER");
+//        http.authorizeHttpRequests().requestMatchers("/")
         http.authorizeHttpRequests().anyRequest().permitAll();
 
         //adding filters

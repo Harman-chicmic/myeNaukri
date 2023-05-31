@@ -1,7 +1,11 @@
 package com.chicmic.eNaukri.service;
 
+import com.chicmic.eNaukri.Dto.JobDto;
 import com.chicmic.eNaukri.model.*;
 import com.chicmic.eNaukri.repo.*;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
@@ -28,27 +32,41 @@ public class JobService {
     private final CompanyRepo companyRepo;
     private final JobSkillsRepo jobSkillsRepo;
     private final UserSkillsRepo userSkillsRepo;
+    private final SkillsRepo skillsRepo;
     @PersistenceContext
     private EntityManager entityManager;
     UsersService usersService;
-    @Async public void saveJob(Job job, Long companyId,Long userId) {
+    @Async public void saveJob(JobDto job, Long companyId) {
         String postedFor=companyRepo.findById(companyId).get().getCompanyName();
-        Users user=usersRepo.findById(userId).get();
-        Job newJob=new Job();
-        newJob.setJobTitle(job.getJobTitle());
-        newJob.setJobDesc(job.getJobDesc());
+        Users user=usersRepo.findById(job.getUserId()).get();
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        Job newJob = mapper.convertValue(job, Job.class);
         newJob.setActive(true);
         newJob.setPostedOn(LocalDate.now());
-        newJob.setExpiresAt(job.getExpiresAt());
         if(user.getCurrentCompany()==postedFor){
+            System.out.println("inside if");
             newJob.setPostFor(companyRepo.findByCompanyName(postedFor.trim()));
         }
 //        else if(user.getCurrentCompany()==null){
 //            newJob.setPostFor(user.getFullName());
 //        }
+        List<JobSkills> newJobSkillList = new ArrayList<>();
+
+        for (String jobSkillId : job.getSkillsList()) {
+            Long skillId = Long.valueOf(jobSkillId);
+            System.out.println("inside service job"+skillId);
+            Skills skill=skillsRepo.findById(skillId).orElse(null);
+            JobSkills jobSkill = JobSkills.builder().jobSkill(skill).job(newJob).build();
+            if (skill != null) {
+                newJobSkillList.add(jobSkill);
+            }
+        }
+        newJob.setJobSkillsList(newJobSkillList);
         jobRepo.save(newJob);
-        List<Users> usersList=getUsersWithMatchingSkills(job.getJobId());
-        sendEmailNotifications(usersList,job);
+        List<Users> usersList=getUsersWithMatchingSkills(newJob.getJobId());
+        sendEmailNotifications(usersList,newJob);
     }
     public List<Job> displayFilteredPaginatedJobs(String query, String location, String jobType, String postedOn, String remoteHybridOnsite) {
         CriteriaBuilder builder=entityManager.getCriteriaBuilder();

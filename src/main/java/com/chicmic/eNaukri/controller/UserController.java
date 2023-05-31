@@ -30,7 +30,7 @@ public class UserController {
     SkillsService skillsService;
     EducationService educationService;
     @Autowired ExperienceService experienceService;
-    ApplicationService applicationService;
+    @Autowired ApplicationService applicationService;
     UserServiceImpl userService;
     @Autowired
     UsersService usersService;
@@ -50,7 +50,7 @@ public class UserController {
         applicationService.viewApplications(userId);
         return ResponseEntity.ok("list of your applications");
     }
-    @PostMapping("/{userId}/skills")
+    @PostMapping("{userId}/skills")
     public ResponseEntity<String> selectUserSkills(
             @PathVariable("userId") Long userId,
             @RequestBody UserSkillDto dto) {
@@ -58,21 +58,21 @@ public class UserController {
         skillsService.addSkills(dto);
         return ResponseEntity.ok("Skills selected successfully.");
     }
-    @PostMapping("/{userId}/education")
+    @PostMapping("{userId}/education")
     public ResponseEntity<String> selectUserEducation(
             @PathVariable("userId") Long userId,
             @RequestBody UserEducationDto dto) {
         educationService.addEducation(dto,userId);
         return ResponseEntity.ok("Educational qualification added to the user");
     }
-    @PostMapping("/{userId}/experience")
+    @PostMapping("{userId}/experience")
     public ResponseEntity<String> selectExperience(
             @PathVariable("userId") Long userId,
             @RequestBody UserExperienceDto dto) {
         experienceService.addExperience(userId,dto);
         return ResponseEntity.ok("Experience added to the user");
     }
-    @PostMapping("/{userId}/{jobId}/apply")
+    @PostMapping("{userId}/{jobId}/apply")
     public ResponseEntity<String> apply(
             @PathVariable("userId") Long userId, @PathVariable() Long jobId,@RequestParam("resumeFile") MultipartFile resumeFile,
             @RequestBody Application application)throws IOException,MessagingException {
@@ -89,20 +89,20 @@ public class UserController {
         userService.changeAlerts(id,true);
         return "Subscribed !";
     }
-    @GetMapping("/{id}/currentCompany")
+    @GetMapping("{id}/currentCompany")
     public String currentCompany(@PathVariable("id") Long id){
         return userService.findCurrentCompany(id);
     }
-    @GetMapping("/{userId}/{jobId}/checkApplication")
+    @GetMapping("{userId}/{jobId}/checkApplication")
     public String check(@PathVariable("userId") Long userId, @PathVariable("jobId") Long jobId){
         userService.checkJobForUser(userId, jobId);
         return "";
     }
-    @GetMapping("/{userId}/{jobId}/withdraw")
+    @GetMapping("{userId}/{jobId}/withdraw")
     public void withdraw(@PathVariable("userId") Long userId, @PathVariable("jobId") Long jobId){
         userService.withdrawApxn(userId, jobId);
     }
-    @GetMapping("/{jobId}/numApplicants")
+    @GetMapping("{jobId}/numApplicants")
     public String numApplicants(@PathVariable Long jobId){
         return String.valueOf(applicationService.getNumApplicantsForJob(jobId));
     }
@@ -111,8 +111,8 @@ public class UserController {
         linkService.addSocialLinks(userId, dto,null);
         return ResponseEntity.ok("Added social links");
     }
-    @PostMapping("/{userId}/verify")
-    public ResponseEntity<String> verify(@PathVariable Long userId,@RequestParam String otp){
+    @PostMapping("{userId}/verify")
+    public ResponseEntity<String> verify(@PathVariable("userId") Long userId,@RequestParam String otp){
         boolean isVerified = usersService.verify(userId, otp);
         if (isVerified) {
             return ResponseEntity.ok("User verification successful.");

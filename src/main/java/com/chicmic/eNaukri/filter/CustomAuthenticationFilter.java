@@ -14,11 +14,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
 import java.util.*;
+
+import static com.chicmic.eNaukri.ENaukriApplication.passwordEncoder;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -26,9 +29,12 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
 
     private AuthenticationManager authenticationManager;
     private UserServiceImpl userService;
-    public CustomAuthenticationFilter(UserServiceImpl userService, AuthenticationManager authenticationManager) {
-        this.userService=userService;
-        this.authenticationManager=authenticationManager;
+    //private PasswordEncoder passwordEncoder;
+
+
+    public CustomAuthenticationFilter(UserServiceImpl userService,AuthenticationManager authenticationManager) {
+        this.authenticationManager = authenticationManager;
+        this.userService = userService;
     }
 
     @Override

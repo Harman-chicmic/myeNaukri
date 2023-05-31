@@ -29,6 +29,7 @@ public class ENaukriApplication {
 	@Bean
 	public static BCryptPasswordEncoder passwordEncoder() {
 		BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+
 		return bCryptPasswordEncoder;
 	}
 }

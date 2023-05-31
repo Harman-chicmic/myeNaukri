@@ -22,7 +22,6 @@ public class Job {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long jobId;
-
     private String jobTitle;
     private String location;
     private String jobType;
@@ -38,7 +37,7 @@ public class Job {
     @OneToMany(mappedBy = "jobId", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     private List<Application> applicationList =new ArrayList<>();
 
-    @OneToMany(mappedBy = "job", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "job", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     private List<JobSkills> jobSkillsList =new ArrayList<>();
 
     @ManyToOne(cascade = CascadeType.REMOVE)

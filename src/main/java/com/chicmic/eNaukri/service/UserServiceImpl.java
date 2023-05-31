@@ -90,7 +90,8 @@ public class UserServiceImpl implements UserDetailsService {
 
         Collection<Authority> authorites=new ArrayList<>();
         authorites.add(new Authority("USER"));
-
+        System.out.println("hgdsagadhash");
+        System.out.println(user.getPassword());
         return new User(user.getEmail(),user.getPassword(),authorites);
     }
 

@@ -32,7 +32,6 @@ public class PasswordResetService {
             throws MessagingException, UnsupportedEncodingException {
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message);
-
         helper.setFrom("bluflame.business@gmail.com", "eNaukri Site");
         helper.setTo(recipientEmail);
 
