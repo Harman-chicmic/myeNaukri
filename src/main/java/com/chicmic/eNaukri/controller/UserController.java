@@ -1,16 +1,17 @@
 package com.chicmic.eNaukri.controller;
 
-import com.chicmic.eNaukri.Dto.UserEducationDto;
-import com.chicmic.eNaukri.Dto.UserExperienceDto;
-import com.chicmic.eNaukri.Dto.UserSkillDto;
-import com.chicmic.eNaukri.Dto.UsersDto;
+import com.chicmic.eNaukri.CustomExceptions.ApiException;
+
+import com.chicmic.eNaukri.Dto.*;
 import com.chicmic.eNaukri.model.*;
 import com.chicmic.eNaukri.service.*;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -25,25 +26,22 @@ import java.util.Map;
 @RequestMapping("/user/")
 @RequiredArgsConstructor
 public class UserController {
-
-    @Autowired
-    SkillsService skillsService;
-    EducationService educationService;
-    @Autowired ExperienceService experienceService;
-    @Autowired ApplicationService applicationService;
-    UserServiceImpl userService;
-    @Autowired
-    UsersService usersService;
-    SocialLinkService linkService;
-    JobService jobService;
+    private final SkillsService skillsService;
+    private final EducationService educationService;
+    private final ExperienceService experienceService;
+    private final ApplicationService applicationService;
+    private final UserServiceImpl userService;
+    private final UsersService usersService;
+    private final SocialLinkService linkService;
 
     @GetMapping("{id}")
     public void getUser(){
 
     }
     @PostMapping("{id}/update-profile")
-    public void updateProfile(UsersDto user, @RequestParam("resumeFile")MultipartFile resumeFile, @RequestParam("imgFile")MultipartFile imgFile) throws IOException {
+    public ResponseEntity<String> updateProfile(@Valid UsersDto user, @PathVariable("id") Long id, @RequestParam("resumeFile")MultipartFile resumeFile, @RequestParam("imgFile")MultipartFile imgFile) throws IOException {
         usersService.updateUser(user,imgFile,resumeFile);
+        return ResponseEntity.ok("updated successfully");
     }
     @GetMapping("{userId}/myapplications")
     public ResponseEntity<String> myApplications(@PathVariable("userId") Long userId){
@@ -74,9 +72,9 @@ public class UserController {
     }
     @PostMapping("{userId}/{jobId}/apply")
     public ResponseEntity<String> apply(
-            @PathVariable("userId") Long userId, @PathVariable() Long jobId,@RequestParam("resumeFile") MultipartFile resumeFile,
-            @RequestBody Application application)throws IOException,MessagingException {
-        applicationService.applyForJob(application,resumeFile,userId,jobId);
+            @PathVariable("userId") Long userId, @PathVariable("jobId") Long jobId,
+             ApplicationDto application) throws MessagingException, IOException {
+        applicationService.applyForJob(application,userId,jobId);
         return ResponseEntity.ok("Successfully applied to the job");
     }
     @GetMapping("{id}/unsubscribe")
@@ -98,7 +96,7 @@ public class UserController {
         userService.checkJobForUser(userId, jobId);
         return "";
     }
-    @GetMapping("{userId}/{jobId}/withdraw")
+    @PostMapping("{userId}/{jobId}/withdraw")
     public void withdraw(@PathVariable("userId") Long userId, @PathVariable("jobId") Long jobId){
         userService.withdrawApxn(userId, jobId);
     }
@@ -107,7 +105,7 @@ public class UserController {
         return String.valueOf(applicationService.getNumApplicantsForJob(jobId));
     }
     @PostMapping("{userid}/addSocialLinks")
-    public ResponseEntity<String> addSocialLinks(@PathVariable Long userId, SocialLink dto){
+    public ResponseEntity<String> addSocialLinks(@PathVariable("userid") Long userId, @RequestBody SocialLinkDto dto){
         linkService.addSocialLinks(userId, dto,null);
         return ResponseEntity.ok("Added social links");
     }

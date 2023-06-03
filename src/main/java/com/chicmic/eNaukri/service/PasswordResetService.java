@@ -6,6 +6,7 @@ import com.chicmic.eNaukri.repo.PasswordResetTokenRepo;
 import com.chicmic.eNaukri.repo.UsersRepo;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -15,13 +16,11 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class PasswordResetService {
-    @Autowired
-    JavaMailSender javaMailSender;
-    @Autowired
-    PasswordResetTokenRepo resetTokenRepo;
-    @Autowired
-    UsersRepo usersRepo;
+    private final JavaMailSender javaMailSender;
+    private final PasswordResetTokenRepo resetTokenRepo;
+    private final UsersRepo usersRepo;
     public PasswordResetToken findByToken(String token){
         return resetTokenRepo.findByToken(token);
     }

@@ -30,8 +30,8 @@ public class UserControllers {
     UsersService usersService;
     @Autowired
     PasswordResetService passwordResetService;
-    @Autowired
-    BCryptPasswordEncoder passwordEncoder;
+//    @Autowired
+//    BCryptPasswordEncoder passwordEncoder;
 
 //    @PostMapping("/signup")
 //    @ResponseStatus(HttpStatus.CREATED)

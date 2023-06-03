@@ -26,10 +26,8 @@ public class ENaukriApplication {
 		taskExecutor.initialize();
 		return taskExecutor;
 	}
-	@Bean
-	public static BCryptPasswordEncoder passwordEncoder() {
-		BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
 
-		return bCryptPasswordEncoder;
+	 public static BCryptPasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
 	}
 }

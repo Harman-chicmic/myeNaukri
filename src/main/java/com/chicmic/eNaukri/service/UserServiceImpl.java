@@ -1,5 +1,6 @@
 package com.chicmic.eNaukri.service;
 
+import com.chicmic.eNaukri.CustomExceptions.ApiException;
 import com.chicmic.eNaukri.Dto.UsersDto;
 import com.chicmic.eNaukri.controller.UserController;
 import com.chicmic.eNaukri.model.*;
@@ -15,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
@@ -63,23 +65,23 @@ public class UserServiceImpl implements UserDetailsService {
 
     public Users findUserFromUUID(String token) {
         UserToken userToken= tokenRepo.findByToken(token);
-        return usersRepo.findById(userToken.getUserr().getUserId()).get();
+        if(userToken==null){
+//            throw new ApiException(HttpStatus.BAD_REQUEST,"Null or invalid token.");
+            return null;
+        }
+//        return usersRepo.findById(userToken.getUserr().getUserId()).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND,"User doesn't exist"));
+    return userToken.getUserr();
+    }
+    @Transactional
+    public void deleteToken(String uuid) {
+        tokenRepo.deleteUserTokenByToken(uuid);
     }
 
+    @Transactional
     public void logout(HttpServletRequest request, HttpServletResponse response) {
-
-        Cookie[] cookies=request.getCookies();
-        if(cookies!=null){
-            for(Cookie cookie:cookies){
-                if("AuthHeader".equals(cookie.getName())){
-                    tokenRepo.deleteByToken(cookie.getValue());
-                    cookie.setValue(null);
-                    cookie.setMaxAge(0);
-                    cookie.setPath("/");
-                    response.addCookie(cookie);break;
-                }
-            }
-        }
+        String authHeader=request.getHeader("Authorization").substring(7);
+        System.out.println(authHeader);
+        tokenRepo.deleteUserTokenByToken(authHeader);
     }
 
     @Override
@@ -90,8 +92,8 @@ public class UserServiceImpl implements UserDetailsService {
 
         Collection<Authority> authorites=new ArrayList<>();
         authorites.add(new Authority("USER"));
-        System.out.println("hgdsagadhash");
-        System.out.println(user.getPassword());
+//        System.out.println("hgdsagadhash");
+//        System.out.println(user.getPassword());
         return new User(user.getEmail(),user.getPassword(),authorites);
     }
 
@@ -123,73 +125,4 @@ public class UserServiceImpl implements UserDetailsService {
     }
     public Users getUserByUuid(String uuid) { return usersRepo.findByUuid(uuid); }
 
-
-
-//    public void updateUser(UsersDto user, MultipartFile imgFile, MultipartFile resumeFile) throws IOException {
-//        Users existingUser=usersRepo.findByEmail(user.getEmail());
-//        if(user.getFullName()!=null){
-//            existingUser.setFullName(user.getFullName());
-//        }
-//        if(user.getPhoneNumber()!=null){
-//            existingUser.setPhoneNumber(user.getPhoneNumber());
-//        }
-//        if (user.getCurrentCompany()!=null){
-//            existingUser.setCurrentCompany(user.getCurrentCompany());
-//        }
-//        if(user.getBio()!=null){
-//            existingUser.setBio(user.getBio());
-//        }
-//        if(!imgFile.isEmpty()){
-//            String imgFolder = imagePath;
-//            System.out.println(imagePath);
-//            byte[] imgFileBytes = imgFile.getBytes();
-//            Path imgPath = Paths.get(imgFolder +  imgFile.getOriginalFilename());
-//            Files.write(imgPath, imgFileBytes);
-//            String ppPath="/static/assets/img" +imgFile.getOriginalFilename();
-//            existingUser.setPpPath(ppPath);
-//        }
-//        if(!resumeFile.isEmpty()){
-//            String resumeFolder=resumePath;
-//            byte[] resumeFileBytes= resumeFile.getBytes();
-//            Path resumePath=Paths.get(resumeFolder+resumeFile.getOriginalFilename());
-//            Files.write(resumePath,resumeFileBytes);
-//            String cvPath="/static/assets/files" +resumeFile.getOriginalFilename();
-//            existingUser.setCvPath(cvPath);
-//        }
-//        usersRepo.save(existingUser);
-//    }
-
-//    public void saveUser(UsersDto dto, MultipartFile imgFile, MultipartFile resumeFile) throws IOException {
-//        String userToken=UUID.randomUUID().toString();
-//        String fullName=dto.getFullName();
-//        String email= dto.getEmail();
-//        String phone=dto.getPhoneNumber();
-//        String password=dto.getPassword();
-//        String bio=dto.getBio();
-//        String imgFolder = imagePath;
-//        String resumeFolder=resumePath;
-//        System.out.println(imagePath);
-//        Users user=Users.builder()
-//                .fullName(fullName)
-//                .email(email)
-//                .phoneNumber(phone)
-//                .password(passwordEncoder().encode(password))
-//                .uuid(userToken)
-//                .bio(bio)
-//                .enableNotification(true)
-//                .build();
-//        if(!imgFile.isEmpty()&&!resumeFile.isEmpty()){
-//            byte[] imgFileBytes = imgFile.getBytes();
-//            byte[] resumeFileBytes= resumeFile.getBytes();
-//            Path imgPath = Paths.get(imgFolder +  imgFile.getOriginalFilename());
-//            Path resumePath=Paths.get(resumeFolder+resumeFile.getOriginalFilename());
-//            logger.info(imgPath.toString()+resumePath.toString());
-//            Files.write(imgPath, imgFileBytes);
-//            Files.write(resumePath,resumeFileBytes);
-//            user=Users.builder()
-//                    .ppPath("/static/assets/img" +imgFile.getOriginalFilename())
-//                    .cvPath("/static/assets/files" +resumeFile.getOriginalFilename()).build();
-//        }
-//       register(user);
-//    }
 }

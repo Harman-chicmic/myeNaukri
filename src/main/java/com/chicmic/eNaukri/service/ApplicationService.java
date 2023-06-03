@@ -1,5 +1,7 @@
 package com.chicmic.eNaukri.service;
 
+import com.chicmic.eNaukri.CustomExceptions.ApiException;
+import com.chicmic.eNaukri.Dto.ApplicationDto;
 import com.chicmic.eNaukri.model.Application;
 
 import com.chicmic.eNaukri.model.Company;
@@ -9,14 +11,17 @@ import com.chicmic.eNaukri.repo.ApplicationRepo;
 import com.chicmic.eNaukri.repo.CompanyRepo;
 import com.chicmic.eNaukri.repo.JobRepo;
 import com.chicmic.eNaukri.repo.UsersRepo;
+import com.chicmic.eNaukri.util.FileUploadUtil;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -33,40 +38,39 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ApplicationService {
-    @Value("${my.cvPath.string}")
-    String resumePath;
-    ApplicationRepo applicationRepo;
-    UsersRepo usersRepo;
-    @Autowired JobRepo jobRepo;
-    JavaMailSender javaMailSender;
-    CompanyRepo companyRepo;
-    @Async
-    public void applyForJob(Application application, MultipartFile resumeFile, Long userId, Long jobId)
-            throws IOException,MessagingException{
-       Users user = usersRepo.findByUserId(userId);
-       Job job=jobRepo.findJobByJobId(jobId);
-       if(job.isActive()==true){
-       ObjectMapper mapper = new ObjectMapper();
-       mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-       Application jobApplication = mapper.convertValue(application, Application.class);
-        if(!resumeFile.isEmpty()){
-            String resumeFolder=resumePath;
-            byte[] resumeFileBytes= resumeFile.getBytes();
-            Path resumePath= Paths.get(resumeFolder+resumeFile.getOriginalFilename());
-            Files.write(resumePath,resumeFileBytes);
-            String cvPath="/static/assets/files" +resumeFile.getOriginalFilename();
-            jobApplication.setCvPath(cvPath);
+    private final FileUploadUtil fileUploadUtil;
+    private final ApplicationRepo applicationRepo;
+    private final UsersRepo usersRepo;
+    private final JobRepo jobRepo;
+    private final JavaMailSender javaMailSender;
+    public void applyForJob(ApplicationDto application, Long userId, Long jobId)
+            throws IOException, MessagingException, ApiException {
+
+        Users user = usersRepo.findByUserId(userId);
+        Job job = jobRepo.findJobByJobId(jobId);
+        MultipartFile resumeFile = application.getResumeFile();
+
+        boolean hasExistingApplication = applicationRepo.existsByApplicantIdAndJobId(user, job);
+        if (hasExistingApplication) {
+            throw new ApiException(HttpStatus.valueOf(409),"User has already applied to this job.");
         }
-        applicationRepo.save(jobApplication);
-        job.setNumApplicants(job.getNumApplicants()+1);
-        jobRepo.save(job);
-        String jobTitle= job.getJobTitle();
-        String company=job.getPostFor().getCompanyName();
-        Company company1=companyRepo.findByCompanyName(company);
-        sendEmailOnApplication(user.getEmail(),jobTitle,company);
-//        sendEmailOnApplication(company1.);
-       }
+        else {
+            if (job.isActive() == true) {
+                Application jobApplication = new Application();
+                BeanUtils.copyProperties(application, jobApplication);
+                jobApplication.setCvPath(fileUploadUtil.resumeUpload(resumeFile));
+                jobApplication.setApplicantId(user);
+                jobApplication.setJobId(job);
+                applicationRepo.save(jobApplication);
+                job.setNumApplicants(job.getNumApplicants() + 1);
+                jobRepo.save(job);
+                String jobTitle = job.getJobTitle();
+                String company = job.getPostFor().getCompanyName();
+                sendEmailOnApplication(user.getEmail(), jobTitle, company);
+            }
+        }
     }
+    @Async
     public void sendEmailOnApplication(String recipientEmail, String jobTitle,String company)
             throws MessagingException, UnsupportedEncodingException {
         MimeMessage message = javaMailSender.createMimeMessage();
@@ -87,8 +91,9 @@ public class ApplicationService {
         return applications;
     }
     public int getNumApplicantsForJob(Long jobId) {
-        Job job = jobRepo.findById(jobId)
-                .orElseThrow(() -> new IllegalArgumentException("Job not found"));
+        Job job = jobRepo.findById(jobId).orElse(null);
+        if(job==null)
+            throw new ApiException(HttpStatus.CONFLICT,"not found");
         return job.getNumApplicants();
     }
 }

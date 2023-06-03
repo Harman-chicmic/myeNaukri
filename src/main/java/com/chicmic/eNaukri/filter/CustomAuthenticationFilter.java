@@ -1,7 +1,11 @@
 package com.chicmic.eNaukri.filter;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.chicmic.eNaukri.model.*;
 import com.chicmic.eNaukri.service.UserServiceImpl;
+import io.jsonwebtoken.Jwt;
+import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -11,17 +15,23 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.rsocket.RSocketSecurity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
+import java.security.AlgorithmConstraints;
+import java.security.AlgorithmParameters;
 import java.util.*;
 
-import static com.chicmic.eNaukri.ENaukriApplication.passwordEncoder;
+import static com.chicmic.eNaukri.config.SecurityConstants.EXPIRATION_TIME;
+import static com.chicmic.eNaukri.config.SecurityConstants.SECRET;
+
+
 
 @Slf4j
 @RequiredArgsConstructor
@@ -29,20 +39,19 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
 
     private AuthenticationManager authenticationManager;
     private UserServiceImpl userService;
-    //private PasswordEncoder passwordEncoder;
 
 
-    public CustomAuthenticationFilter(UserServiceImpl userService,AuthenticationManager authenticationManager) {
-        this.authenticationManager = authenticationManager;
-        this.userService = userService;
+    public CustomAuthenticationFilter(UserServiceImpl userService, AuthenticationManager authenticationManager) {
+        this.userService=userService;
+        this.authenticationManager=authenticationManager;
     }
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
 
     // sending username, password to authentication manager
-        String username=request.getParameter("username").trim().toLowerCase();
-        String password=request.getParameter("password").trim().toLowerCase();
+        String username=request.getParameter("username");
+        String password=request.getParameter("password");
 
         UsernamePasswordAuthenticationToken authenticationToken=new UsernamePasswordAuthenticationToken(username,password);
         return authenticationManager.authenticate(authenticationToken);
@@ -57,39 +66,22 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
     // after successful login
         Collection<Authority> authorities=new ArrayList<>();
         authorities.add(new Authority("USER"));
-        UUID uuid=UUID.randomUUID();
 
         Users loggedInUser=userService.getUserByEmail(authResult.getName());
-        UserToken userToken=UserToken.builder().userr(loggedInUser).token(uuid.toString()).build();
+        String token = JWT.create()
+                .withSubject(((User) authResult.getPrincipal()).getUsername())
+                .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .sign(Algorithm.HMAC256(SECRET.getBytes()));
+        UserToken userToken=UserToken.builder().userr(loggedInUser).token(token).build();
 
     // saving uuid & updating cookies
         userService.saveUUID(userToken);
-
-        String redirectUrl="";
-        Cookie[] cookies=request.getCookies();
-        if(cookies!=null){
-            for(Cookie cookie:cookies){
-                if("JSESSIONID".equals(cookie.getName())){
-                    cookie.setValue(uuid.toString());
-                    response.addCookie(cookie);
-                }
-                if("prevURL".equals(cookie.getName())){
-                    redirectUrl=(!cookie.getValue().isEmpty())?cookie.getValue():"";
-                }
-            }
-        }
-
-        Cookie cookie=new Cookie("AuthHeader",uuid.toString());
-        cookie.setMaxAge(60*60*24);
-        cookie.setHttpOnly(true);
-        response.addCookie(cookie);
-
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken=new UsernamePasswordAuthenticationToken(loggedInUser,null,authorities);
         SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+        String body = ((User) authResult.getPrincipal()).getUsername() + " " + token;
 
-    //redirecting
-        redirectUrl=(redirectUrl.trim().isEmpty())?"/login-page":redirectUrl;
-        new DefaultRedirectStrategy().sendRedirect(request,response,redirectUrl);
+        response.getWriter().write(body);
+        response.getWriter().flush();
     }
 
 }

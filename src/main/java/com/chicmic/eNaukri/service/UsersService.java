@@ -2,10 +2,17 @@ package com.chicmic.eNaukri.service;
 
 import com.chicmic.eNaukri.Dto.UsersDto;
 import com.chicmic.eNaukri.model.Education;
+import com.chicmic.eNaukri.model.UserCompany;
 import com.chicmic.eNaukri.model.Users;
+import com.chicmic.eNaukri.repo.CompanyRepo;
+import com.chicmic.eNaukri.repo.UserCompanyRepo;
 import com.chicmic.eNaukri.repo.UsersRepo;
+import com.chicmic.eNaukri.util.CustomObjectMapper;
+import com.chicmic.eNaukri.util.FileUploadUtil;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
@@ -25,17 +32,15 @@ import java.time.LocalDateTime;
 import java.util.Random;
 import java.util.UUID;
 
-@Service public class UsersService {
-    @Value("${my.imagePath.string}")
-    String imagePath;
-    @Value("${my.cvPath.string}")
-    String resumePath;
-    @Autowired
-    UsersRepo usersRepo;
-    @Autowired
-    JavaMailSender javaMailSender;
-    @Autowired
-    BCryptPasswordEncoder passwordEncoder;
+import static com.chicmic.eNaukri.ENaukriApplication.passwordEncoder;
+
+@Service
+@RequiredArgsConstructor
+public class UsersService {
+    private final UsersRepo usersRepo;
+    private final JavaMailSender javaMailSender;
+    private final FileUploadUtil fileUploadUtil;
+
     public Users getUserByEmail(String email) {
         return usersRepo.findByEmail(email);
     }
@@ -45,44 +50,34 @@ import java.util.UUID;
     }
     public Users getUserById(Long userId){return usersRepo.findByUserId(userId);}
 
-    @Async
-    public void register(Users dto, MultipartFile imgFile,
-    MultipartFile resumeFile) throws IOException {
+
+    public void register(@Valid Users dto, @RequestParam MultipartFile imgFile,
+                         @RequestParam MultipartFile resumeFile) throws IOException {
         String uuid= UUID.randomUUID().toString();
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        Users newUser = mapper.convertValue(dto, Users.class);
-        if(!imgFile.isEmpty()){
-            String imgFolder = imagePath;
-            byte[] imgFileBytes = imgFile.getBytes();
-            Path imgPath = Paths.get(imgFolder +  imgFile.getOriginalFilename());
-            Files.write(imgPath, imgFileBytes);
-            String ppPath="/static/assets/img" +imgFile.getOriginalFilename();
-            newUser.setPpPath(ppPath);
-        }
-        if(!resumeFile.isEmpty()){
-            String resumeFolder=resumePath;
-            byte[] resumeFileBytes= resumeFile.getBytes();
-            Path resumePath=Paths.get(resumeFolder+resumeFile.getOriginalFilename());
-            Files.write(resumePath,resumeFileBytes);
-            String cvPath="/static/assets/files" +resumeFile.getOriginalFilename();
-            newUser.setCvPath(cvPath);
-        }
+        Users newUser = CustomObjectMapper.convertDtoToObject(dto,Users.class);
+        newUser.setPpPath(fileUploadUtil.imageUpload(imgFile));
+        newUser.setCvPath(fileUploadUtil.resumeUpload(resumeFile));
         newUser.setUuid(uuid);
         // Generate OTP
         String otp =Integer.toString(new Random().nextInt(999999));
         // Send OTP to user's email
         String subject = "OTP for user registration";
         String message = "Your OTP is: " + otp;
-        newUser.setPassword(passwordEncoder.encode(dto.getPassword()));
+        newUser.setPassword(passwordEncoder().encode(dto.getPassword()));
         newUser.setCreatedAt(LocalDateTime.now());
         newUser.setOtp(otp);
         newUser.setVerified(false);
         usersRepo.save(newUser);
+        System.out.println(newUser.getCvPath());
         sendEmailForOtp(newUser.getEmail(), subject, message);
+//        UserCompany userCompany=new UserCompany();
+//        userCompany.setCompanyUsers(newUser);
+//        userCompany.setUsersCompany(companyRepo.findByCompanyName(newUser.getCurrentCompany()));
+//        userCompany.setCurrentlyWorking(true);
+//        userCompanyRepo.save(userCompany);
     }
 
-    public void sendEmailForOtp(String to, String subject, String body) {
+    @Async public void sendEmailForOtp(String to, String subject, String body) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom("harmanjyot.singh@chicmic.co.in");
         message.setTo(to);
@@ -106,37 +101,14 @@ import java.util.UUID;
             return false;
         }
     }
-    public void updateUser(UsersDto user, @RequestParam MultipartFile imgFile, @RequestParam MultipartFile resumeFile) throws IOException {
+    public void updateUser(@Valid UsersDto user, @RequestParam MultipartFile imgFile,
+                           @RequestParam MultipartFile resumeFile) throws IOException {
         Users existingUser=usersRepo.findByEmail(user.getEmail());
-        if(user.getFullName()!=null){
-            existingUser.setFullName(user.getFullName());
-        }
-        if(user.getPhoneNumber()!=null){
-            existingUser.setPhoneNumber(user.getPhoneNumber());
-        }
-        if (user.getCurrentCompany()!=null){
-            existingUser.setCurrentCompany(user.getCurrentCompany());
-        }
-        if(user.getBio()!=null){
-            existingUser.setBio(user.getBio());
-        }
-        if(!imgFile.isEmpty()){
-            String imgFolder = imagePath;
-            System.out.println(imagePath);
-            byte[] imgFileBytes = imgFile.getBytes();
-            Path imgPath = Paths.get(imgFolder +  imgFile.getOriginalFilename());
-            Files.write(imgPath, imgFileBytes);
-            String ppPath="/static/assets/img" +imgFile.getOriginalFilename();
-            existingUser.setPpPath(ppPath);
-        }
-        if(!resumeFile.isEmpty()){
-            String resumeFolder=resumePath;
-            byte[] resumeFileBytes= resumeFile.getBytes();
-            Path resumePath=Paths.get(resumeFolder+resumeFile.getOriginalFilename());
-            Files.write(resumePath,resumeFileBytes);
-            String cvPath="/static/assets/files" +resumeFile.getOriginalFilename();
-            existingUser.setCvPath(cvPath);
-        }
+        ObjectMapper mapper = CustomObjectMapper.createObjectMapper();
+        mapper.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false);
+        mapper.updateValue(existingUser,user);
+        existingUser.setPpPath(fileUploadUtil.imageUpload(imgFile));
+        existingUser.setCvPath(fileUploadUtil.resumeUpload(resumeFile));
         existingUser.setUpdatedAt(LocalDateTime.now());
         usersRepo.save(existingUser);
     }

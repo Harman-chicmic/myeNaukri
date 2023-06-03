@@ -39,24 +39,23 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
 
-        //Filter objects
+    //Filter objects
         CustomAuthenticationFilter authenticationFilter=
                 new CustomAuthenticationFilter(userService,authenticationManager(http.getSharedObject(AuthenticationConfiguration.class)));
         authenticationFilter.setFilterProcessesUrl("/login");
 
-        //csrf+session
+    //csrf+session
         http.csrf().disable();
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        //permits
-//        http.authorizeHttpRequests().requestMatchers("/user/**").hasAnyAuthority("USER");
-//        http.authorizeHttpRequests().requestMatchers("/")
+    //permits
+        http.authorizeHttpRequests().requestMatchers("/user/**","/company/**").hasAnyAuthority("USER");
         http.authorizeHttpRequests().anyRequest().permitAll();
 
-        //adding filters
+    //adding filters
         http.addFilterBefore(new CustomAuthorizationFilter(userService), UsernamePasswordAuthenticationFilter.class);
         http.addFilter(authenticationFilter);
 
-        //building
+    //building
         return http.build();
     }
 

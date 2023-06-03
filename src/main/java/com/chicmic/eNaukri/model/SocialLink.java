@@ -1,5 +1,6 @@
 package com.chicmic.eNaukri.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -7,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 @Entity
 @Data
 @RequiredArgsConstructor
+@JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
 public class SocialLink {
 
     @Id

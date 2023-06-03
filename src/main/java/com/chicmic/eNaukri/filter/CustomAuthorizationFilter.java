@@ -1,81 +1,59 @@
 package com.chicmic.eNaukri.filter;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.chicmic.eNaukri.CustomExceptions.ApiException;
 import com.chicmic.eNaukri.model.Authority;
 import com.chicmic.eNaukri.model.Users;
 import com.chicmic.eNaukri.service.UserServiceImpl;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.web.filter.OncePerRequestFilter;
-
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.*;
+import static com.chicmic.eNaukri.config.SecurityConstants.SECRET;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 public class CustomAuthorizationFilter extends OncePerRequestFilter {
 
     private UserServiceImpl userService;
 
-    public CustomAuthorizationFilter(UserServiceImpl userService) {
-        this.userService = userService;
+    public  CustomAuthorizationFilter(UserServiceImpl userService){
+        this.userService=userService;
     }
-
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         System.out.println(request.getServletPath());
 
-        if (request.getServletPath().contains("/verify") || request.getServletPath().equals("/login")) {
-            System.out.println("inside if auth");
-            filterChain.doFilter(request, response);
-
-        } else {
-            String token = null;
-            if (request.getCookies() != null) {
-                token = Arrays.stream(request.getCookies())
-                        .filter(c -> c.getName().equals("AuthHeader")).findFirst()
-                        .map(Cookie::getValue).orElse(null);
+        if(request.getServletPath().contains("/user/")||request.getServletPath().contains("/company/")){
+            String token=request.getHeader("Authorization").substring(7);
+            if(token==null || userService.findUserFromUUID(token)==null){
+                Map<String,String> error=new HashMap<>();
+                error.put("error_message","Please provide valid token");
+                response.setContentType(APPLICATION_JSON_VALUE);
+                new ObjectMapper().writeValue(response.getOutputStream(),error);
             }
-
-            if (token == null || userService.findUserFromUUID(token) == null) {
-
-                Cookie prevUrl = new Cookie("prevURL", request.getServletPath());
-                prevUrl.setHttpOnly(true);
-                prevUrl.setMaxAge(60 * 10);
-                response.addCookie(prevUrl);
-
-                String redirectUrl = "/login/page";
-                new DefaultRedirectStrategy().sendRedirect(request, response, redirectUrl);
-//                throw new CustomApiExceptionHandler(HttpStatus.BAD_REQUEST,"Please give Valid Token id");
-
-            } else {
-                if (request.getCookies() != null) {
-                    for (Cookie cookie : request.getCookies()) {
-                        if ("prevURL".equals(cookie.getName())) {
-                            cookie.setValue(null);
-                            cookie.setMaxAge(0);
-                            cookie.setPath("/");
-                            response.addCookie(cookie);
-                            break;
-                        }
-                    }
-                }
-
-                Users temp = userService.findUserFromUUID(token.toLowerCase());
-                Collection<Authority> authorities = new ArrayList<>();
+            else if(token!=null) {
+                String user = JWT.require(Algorithm.HMAC256(SECRET.getBytes()))
+                        .build()
+                        .verify(token)
+                        .getSubject();
+                System.out.println(user+"/jefgegfyugeryfg");
+                Users temp= userService.getUserByEmail(user);
+                Collection<Authority> authorities=new ArrayList<>();
                 authorities.add(new Authority("USER"));
 
-                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
-                        new UsernamePasswordAuthenticationToken(temp, null, authorities);
-
+                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken=
+                        new UsernamePasswordAuthenticationToken(temp,null,authorities);
                 SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-                filterChain.doFilter(request, response);
+                filterChain.doFilter(request,response);
             }
         }
+        else filterChain.doFilter(request,response);
     }
 }

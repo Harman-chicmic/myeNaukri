@@ -1,6 +1,7 @@
 package com.chicmic.eNaukri.controller;
 
 import com.chicmic.eNaukri.Dto.JobDto;
+import com.chicmic.eNaukri.Dto.SocialLinkDto;
 import com.chicmic.eNaukri.model.Company;
 import com.chicmic.eNaukri.model.Job;
 import com.chicmic.eNaukri.model.SocialLink;
@@ -52,7 +53,7 @@ public class CompanyController {
         return ResponseEntity.ok("Status changed");
     }
     @PostMapping("{id}/addSocialLinks")
-    public ResponseEntity<String> addSocialLinks(@PathVariable Long id, SocialLink dto){
+    public ResponseEntity<String> addSocialLinks(@PathVariable Long id, SocialLinkDto dto){
         linkService.addSocialLinks(null, dto,id);
         return ResponseEntity.ok("Added social links");
     }

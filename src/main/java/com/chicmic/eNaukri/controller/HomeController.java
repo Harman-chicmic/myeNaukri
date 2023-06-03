@@ -12,6 +12,7 @@ import com.chicmic.eNaukri.service.UsersService;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,17 +46,17 @@ public class HomeController {
         System.out.println("1");
         return "In Home Page";
     }
-    @GetMapping("login-page")
-    public String loginPage(){
-        return "in Login Page";
-    }
-    @PostMapping("login")
-    public String userLogin(@RequestBody Map<Object,Object> map){
-        return "login successful";
-    }
+//    @GetMapping("login-page")
+//    public String loginPage(){
+//        return "in Login Page";
+//    }
+//    @PostMapping("login")
+//    public String userLogin(@RequestBody Map<Object,Object> map){
+//        return "login successful";
+//    }
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<String> register(Users dto, @RequestParam(required = false,value = "imgFile") MultipartFile imgFile,
+    public ResponseEntity<String> register(@Valid Users dto, @RequestParam(required = false,value = "imgFile") MultipartFile imgFile,
                                            @RequestParam(value = "resumeFile",required = false) MultipartFile resumeFile) throws IOException {
         usersService.register(dto, imgFile, resumeFile);
         return ResponseEntity.ok("User registered successfully");
@@ -93,10 +94,11 @@ public class HomeController {
     }
 
     @PostMapping("/set-new-password")
-    public void setPassword(HttpServletRequest request) throws MessagingException, UnsupportedEncodingException {
+    public ResponseEntity<String> setPassword(HttpServletRequest request) throws MessagingException, UnsupportedEncodingException {
         String email = request.getParameter("email");
         Users user = userService.getUserByEmail(email);
         passwordResetService.createPasswordResetTokenForUser(user);
+        return ResponseEntity.ok("Mail sent");
     }
     @GetMapping("/enterNewPassword/{token}/{uuid}")
     public String Enter(HttpServletRequest
