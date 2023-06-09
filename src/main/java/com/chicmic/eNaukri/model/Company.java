@@ -14,12 +14,16 @@ import java.util.List;
 @Getter
 @Setter
 @RequiredArgsConstructor
-public class Company {
+public class
+Company {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long companyId;
     private String companyName;
+    private String email;
+    private String phoneNumber;
+    private String designation;
     private String locatedAt;
     private LocalDate foundedIn;
     private String about;

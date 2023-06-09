@@ -1,6 +1,5 @@
 package com.chicmic.eNaukri.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -10,17 +9,14 @@ import lombok.Setter;
 @Getter
 @Setter
 @RequiredArgsConstructor
-public class UserEducation {
-
+public class Preference {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userEducationId;
-
-    @ManyToOne
-    @JsonIgnore
-    private Users user;
-
-    @ManyToOne
-    @JsonIgnore
-    private Education education;
+    private Long id;
+    private String location;
+    private String salary;
+    private Long yoe;
+    private String remoteHybridOnsite;
+    @OneToOne
+    private Users userPreferences;
 }

@@ -1,5 +1,8 @@
 package com.chicmic.eNaukri;
 
+import com.stripe.Stripe;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -12,10 +15,17 @@ import java.util.concurrent.Executor;
 @SpringBootApplication
 @EnableAsync(proxyTargetClass = true)
 public class ENaukriApplication {
+	@Value("${stripe.api.key}")
+	private String stripeApiKey;
+	@PostConstruct
+	public void setup(){
+		Stripe.apiKey= stripeApiKey;
+	}
 
 	public static void main(String[] args) {
 		SpringApplication.run(ENaukriApplication.class, args);
 	}
+
 
 	@Bean(name = "threadPoolTaskExecutor")
 	public Executor executor(){

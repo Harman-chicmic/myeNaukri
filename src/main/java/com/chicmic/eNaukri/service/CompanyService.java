@@ -1,6 +1,7 @@
 package com.chicmic.eNaukri.service;
 
 import com.chicmic.eNaukri.model.Company;
+import com.chicmic.eNaukri.model.Job;
 import com.chicmic.eNaukri.repo.CompanyRepo;
 import com.chicmic.eNaukri.repo.ExperienceRepo;
 import com.chicmic.eNaukri.repo.JobRepo;
@@ -16,17 +17,18 @@ import java.util.List;
 public class CompanyService {
 
     private final CompanyRepo companyRepo;
-    private final JobService jobService;
-    private final ExperienceRepo experienceRepo;
-    private final UserServiceImpl userService;
+    private final JobRepo jobRepo;
 
-
-    public boolean jobExistsForCompany(Long id, Long jobId) {
-        Company company=companyRepo.findById(id).get();
+    public Job jobExistsForCompany(Long id, Long jobId) {
+        Company company = companyRepo.findById(id).get();
+        Job reqjob = jobRepo.findById(jobId).get();
         final boolean[] flag = {false};
         company.getJobList().forEach(job -> {
-            if(jobId.equals(job.getJobId())) flag[0] =true;
+            if (jobId.equals(job.getJobId())) flag[0] = true;
         });
-        return flag[0];
+        if (flag[0] = true) {
+            return reqjob;
+        }
+        return null;
     }
 }

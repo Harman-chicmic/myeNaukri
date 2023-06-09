@@ -1,14 +1,13 @@
 package com.chicmic.eNaukri.controller;
 
+import com.chicmic.eNaukri.Dto.ApiResponse;
 import com.chicmic.eNaukri.Dto.UsersDto;
 import com.chicmic.eNaukri.model.Job;
 import com.chicmic.eNaukri.model.PasswordResetToken;
 import com.chicmic.eNaukri.model.Users;
 import com.chicmic.eNaukri.repo.UsersRepo;
-import com.chicmic.eNaukri.service.JobService;
-import com.chicmic.eNaukri.service.PasswordResetService;
-import com.chicmic.eNaukri.service.UserServiceImpl;
-import com.chicmic.eNaukri.service.UsersService;
+import com.chicmic.eNaukri.service.*;
+import com.itextpdf.text.DocumentException;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -40,6 +39,7 @@ public class HomeController {
     private final UserServiceImpl userService;
     private final JobService jobService;
     private final PasswordResetService passwordResetService;
+    private final ResumeGenerator resumeGenerator;
 
     @GetMapping
     public String homePage(){
@@ -54,12 +54,11 @@ public class HomeController {
 //    public String userLogin(@RequestBody Map<Object,Object> map){
 //        return "login successful";
 //    }
-    @PostMapping("/signup")
+    @PostMapping("/api/signup")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<String> register(@Valid Users dto, @RequestParam(required = false,value = "imgFile") MultipartFile imgFile,
-                                           @RequestParam(value = "resumeFile",required = false) MultipartFile resumeFile) throws IOException {
-        usersService.register(dto, imgFile, resumeFile);
-        return ResponseEntity.ok("User registered successfully");
+    public ApiResponse register(@Valid Users dto) {
+        Users user=usersService.register(dto);
+        return new ApiResponse("user created",user,HttpStatus.CREATED );
     }
     @PostMapping("/updateProfile")
     public void updateProfile(UsersDto user, @RequestParam(value="resumeFile",required = false)MultipartFile resumeFile, @RequestParam(value="imgFile",required = false)MultipartFile imgFile) throws IOException {
@@ -105,10 +104,17 @@ public class HomeController {
                                 request, @PathVariable("token") String token, @PathVariable("uuid") String uuid, Model model) {
         PasswordResetToken passwordResetRequest = passwordResetService.findByToken(token);
         if (passwordResetRequest == null || passwordResetRequest.getExpiryDate().isBefore(LocalDateTime.now())) {
+            passwordResetService.delete(passwordResetRequest);
             return "redirect:/login?error=InvalidToken";
         }
         model.addAttribute("token", token);
         return "forgotPasswordForm";
+    }
+    @GetMapping("/{userId}/download-pdf")
+    public String downloadPDF(HttpServletResponse response, @PathVariable Long userId) throws IOException, DocumentException {
+        Users users=usersService.getUserById(userId);
+        resumeGenerator.generatePDF(response,users);
+        return "success";
     }
     @PostMapping("/enterNewPassword/{token}/{uuid}")
     public String resetPassword(HttpServletRequest
@@ -118,6 +124,7 @@ public class HomeController {
         System.out.println(user);
         String newPassword=request.getParameter("password");
         if (passwordResetRequest == null || passwordResetRequest.getExpiryDate().isBefore(LocalDateTime.now())) {
+            passwordResetService.delete(passwordResetRequest);
             return "redirect:/login?error=InvalidToken";
         }
         user.setPassword(passwordEncoder().encode(newPassword));

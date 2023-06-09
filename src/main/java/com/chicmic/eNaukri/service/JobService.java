@@ -102,7 +102,6 @@ public class JobService {
         //typedQuery for future purposes
         TypedQuery<Job> jobTypedQuery=entityManager.createQuery(criteriaQuery);
         return jobTypedQuery.getResultList();
-
     }
 
     public Collection<?> listInterestedApplicants(Long jobId) {
@@ -118,7 +117,6 @@ public class JobService {
         usersSet.forEach(userSkills ->{
             if(userSkills.getUser().isEnableNotification())usersCollection.add(userSkills.getUser().getEmail());
         } );
-
         return usersCollection;
     }
     public void setStatus(Long jobId, boolean active) {
@@ -129,6 +127,7 @@ public class JobService {
             jobRepo.save(job1);
         }
     }
+
     public List<Users> getUsersWithMatchingSkills(Long jobId) {
         Job job=jobRepo.findById(jobId).get();
         List<JobSkills> requiredSkills=job.getJobSkillsList();

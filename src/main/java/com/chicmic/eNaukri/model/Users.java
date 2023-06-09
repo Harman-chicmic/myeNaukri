@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 //import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import org.hibernate.Hibernate;
@@ -32,14 +33,18 @@ public class Users {
     private Long userId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    @NotNull
     private String fullName;
     private String username;
     @Email
     @Pattern(regexp = RegEx.EMAIL)
+    @NotNull
     private String email;
     @Pattern(regexp = RegEx.PASSWORD,message = "")
+    @NotNull
     private String password;
     @Pattern(regexp = RegEx.PHONENUMBER,message = "")
+    @NotNull
     private String phoneNumber;
     private String currentCompany;
     private String cvPath;
@@ -51,6 +56,7 @@ public class Users {
     private String link;
     private boolean isVerified;
     private boolean enableNotification;
+    private boolean hasPremium;
 
 //mappings
 
@@ -58,6 +64,14 @@ public class Users {
     @JsonIgnore
     @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
     private SocialLink socialLink;
+    @OneToOne(mappedBy = "userSubscription", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @JsonIgnore
+    @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
+    private Premium premium;
+    @OneToOne(mappedBy = "userPreferences", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @JsonIgnore
+    @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
+    private Preference preference;
 
     @OneToMany(mappedBy = "edUser", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})

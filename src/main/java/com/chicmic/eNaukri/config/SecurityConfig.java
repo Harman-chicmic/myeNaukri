@@ -22,7 +22,7 @@ import static com.chicmic.eNaukri.ENaukriApplication.passwordEncoder;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-public class SecurityConfig {
+public class SecurityConfig  {
 
     private final UserDetailsService userDetailsService;
     @Autowired
@@ -42,7 +42,10 @@ public class SecurityConfig {
     //Filter objects
         CustomAuthenticationFilter authenticationFilter=
                 new CustomAuthenticationFilter(userService,authenticationManager(http.getSharedObject(AuthenticationConfiguration.class)));
-        authenticationFilter.setFilterProcessesUrl("/login");
+        authenticationFilter.setFilterProcessesUrl("/api/login");
+//        CustomAuthenticationFilter authenticationFilter1=
+//                new CustomAuthenticationFilter(userService,authenticationManager(http.getSharedObject(AuthenticationConfiguration.class)));
+//        authenticationFilter.setFilterProcessesUrl("/company-login");
 
     //csrf+session
         http.csrf().disable();

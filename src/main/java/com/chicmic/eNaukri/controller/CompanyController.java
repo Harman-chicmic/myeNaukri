@@ -36,11 +36,7 @@ public class CompanyController {
     }
     @GetMapping("{id}/jobs/{jobId}")
     public ResponseEntity<?> getjobFromCompany(@PathVariable("id")Long id, @PathVariable("jobId") Long jobId){
-        if(companyService.jobExistsForCompany(id,jobId)){
-            Job job=jobRepo.findById(jobId).get();
-            return ResponseEntity.ok(job);
-        }
-        return (ResponseEntity<?>) ResponseEntity.badRequest().body("Job that you are looking for doesn't exists for this company !");
+            return ResponseEntity.ok(companyService.jobExistsForCompany(id, jobId));
     }
     @PostMapping("{id}/postJob")
     public ResponseEntity<String> postJob(@RequestBody JobDto job, @PathVariable Long id){

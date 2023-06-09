@@ -45,18 +45,15 @@ public class UsersService {
         return usersRepo.findByEmail(email);
     }
     public Users getUserByUuid(String uuid) { return usersRepo.findByUuid(uuid); }
-    public void saveUser(Users user) {
-        usersRepo.save(user);
-    }
+
     public Users getUserById(Long userId){return usersRepo.findByUserId(userId);}
 
 
-    public void register(@Valid Users dto, @RequestParam MultipartFile imgFile,
-                         @RequestParam MultipartFile resumeFile) throws IOException {
+    public Users register(@Valid Users dto) {
         String uuid= UUID.randomUUID().toString();
         Users newUser = CustomObjectMapper.convertDtoToObject(dto,Users.class);
-        newUser.setPpPath(fileUploadUtil.imageUpload(imgFile));
-        newUser.setCvPath(fileUploadUtil.resumeUpload(resumeFile));
+//        newUser.setPpPath(fileUploadUtil.imageUpload(imgFile));
+//        newUser.setCvPath(fileUploadUtil.resumeUpload(resumeFile));
         newUser.setUuid(uuid);
         // Generate OTP
         String otp =Integer.toString(new Random().nextInt(999999));
@@ -70,11 +67,7 @@ public class UsersService {
         usersRepo.save(newUser);
         System.out.println(newUser.getCvPath());
         sendEmailForOtp(newUser.getEmail(), subject, message);
-//        UserCompany userCompany=new UserCompany();
-//        userCompany.setCompanyUsers(newUser);
-//        userCompany.setUsersCompany(companyRepo.findByCompanyName(newUser.getCurrentCompany()));
-//        userCompany.setCurrentlyWorking(true);
-//        userCompanyRepo.save(userCompany);
+        return newUser;
     }
 
     @Async public void sendEmailForOtp(String to, String subject, String body) {

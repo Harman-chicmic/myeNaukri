@@ -62,6 +62,9 @@ public class UserServiceImpl implements UserDetailsService {
     public Users getUserByEmail(String username) {
         return usersRepo.findByEmail(username);
     }
+    public void saveUser(Users user) {
+        usersRepo.save(user);
+    }
 
     public Users findUserFromUUID(String token) {
         UserToken userToken= tokenRepo.findByToken(token);
@@ -86,15 +89,16 @@ public class UserServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-
         Users user= usersRepo.findByEmail(username);
-//        if(user==null)throw new CustomApiExceptionHandler(HttpStatus.NOT_FOUND,username + "doesn't exists, please REGISTER.");
-
-        Collection<Authority> authorites=new ArrayList<>();
-        authorites.add(new Authority("USER"));
-//        System.out.println("hgdsagadhash");
-//        System.out.println(user.getPassword());
-        return new User(user.getEmail(),user.getPassword(),authorites);
+        if(user==null){
+            throw new ApiException(HttpStatus.NOT_FOUND,"User does not exist");
+        }
+        if(user.isVerified()==false){
+            throw new ApiException(HttpStatus.UNAUTHORIZED,"User is not verified");
+        }
+        Collection<Authority> authorities=new ArrayList<>();
+        authorities.add(new Authority("USER"));
+        return new User(user.getEmail(),user.getPassword(),authorities);
     }
 
     public String findCurrentCompany(Long id) {
